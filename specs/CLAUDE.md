@@ -51,29 +51,29 @@ This project implements a lean, well-typed Python SDK for the Trove v3 API and a
 
 ### Stage 2 - Complete Search (Raw Search API)  
 - [ ] **Search Implementation**
-  - [ ] Complete `SearchResource.page(**params)` method
-  - [ ] Support all 60+ search parameters from API docs
-  - [ ] Parameter validation and type checking
-  - [ ] `params.build_limits` utility function
+  - [x] Complete `SearchResource.page(**params)` method
+  - [x] Support all 60+ search parameters from API docs
+  - [x] Parameter validation and type checking
+  - [x] `params.build_limits` utility function
 - [ ] **Pagination**
-  - [ ] Single-category cursor pagination iterators
-  - [ ] `iter_pages` and `iter_records` methods
-  - [ ] Multi-category pagination documentation
-  - [ ] Clear error messages for multi-category limitations
+  - [x] Single-category cursor pagination iterators
+  - [x] `iter_pages` and `iter_records` methods
+  - [x] Multi-category pagination documentation
+  - [x] Clear error messages for multi-category limitations
 - [ ] **Enhanced Caching**
-  - [ ] SQLite persistent cache implementation  
-  - [ ] Route-based TTL configuration
-  - [ ] Cache statistics and monitoring
+  - [x] SQLite persistent cache implementation  
+  - [x] Route-based TTL configuration
+  - [x] Cache statistics and monitoring
 - [ ] **Testing**
-  - [ ] All search parameters validated
-  - [ ] Single-category pagination verified
-  - [ ] Cache effectiveness measured
-  - [ ] Example queries in CI
+  - [x] All search parameters validated
+  - [x] Single-category pagination verified
+  - [x] Cache effectiveness measured
+  - [x] Example queries in CI
 - [ ] **Documentation**
-  - [ ] Complete searching guide (categories, limits, cursors)
-  - [ ] Caching and rate limiting usage
-  - [ ] Multi-category behavior explanation
-- [ ] **Stage 2 Complete**: ✅ All search params work, pagination reliable, examples pass
+  - [x] Complete searching guide (categories, limits, cursors)
+  - [x] Caching and rate limiting usage
+  - [x] Multi-category behavior explanation
+- [x] **Stage 2 Complete**: ✅ All search params work, pagination reliable, examples pass
 
 ### Stage 3 - Core Resources (Individual Record Access)
 - [ ] **Resource Endpoints**

@@ -350,7 +350,178 @@ class NoCache(CacheBackend):
         pass
 
 
-def create_cache(backend_type: str, **kwargs: Any) -> CacheBackend:
+class SearchCacheBackend(CacheBackend):
+    """Enhanced cache backend with search-specific TTL logic and statistics."""
+    
+    def __init__(self, backend: CacheBackend):
+        """Initialize search cache wrapper.
+        
+        Args:
+            backend: Underlying cache backend to wrap
+        """
+        self._backend = backend
+        self._stats = {
+            'hits': 0,
+            'misses': 0, 
+            'sets': 0,
+            'search_requests': 0,
+            'cache_savings_seconds': 0.0
+        }
+        self._route_ttl = {
+            '/result': 900,  # 15 minutes default for search results
+            '/work': 3600,   # 1 hour for individual works
+            '/article': 3600,  # 1 hour for articles
+            '/people': 86400,  # 24 hours for people records (more stable)
+            '/list': 1800,     # 30 minutes for lists
+        }
+        
+    def get_stats(self) -> dict:
+        """Get cache statistics.
+        
+        Returns:
+            Dictionary containing cache hit/miss rates and other metrics
+        """
+        total_requests = self._stats['hits'] + self._stats['misses']
+        hit_rate = (self._stats['hits'] / total_requests) if total_requests > 0 else 0.0
+        
+        return {
+            **self._stats,
+            'total_requests': total_requests,
+            'hit_rate': hit_rate,
+            'miss_rate': 1.0 - hit_rate
+        }
+        
+    def reset_stats(self) -> None:
+        """Reset cache statistics."""
+        self._stats = {
+            'hits': 0,
+            'misses': 0,
+            'sets': 0, 
+            'search_requests': 0,
+            'cache_savings_seconds': 0.0
+        }
+        
+    def set_route_ttl(self, route: str, ttl: int) -> None:
+        """Set TTL for a specific API route.
+        
+        Args:
+            route: API route path (e.g., '/result', '/work')
+            ttl: Time-to-live in seconds
+        """
+        self._route_ttl[route] = ttl
+        
+    def _determine_search_ttl(self, params: dict, response: dict, route: str = '/result') -> int:
+        """Determine TTL based on search characteristics.
+        
+        Args:
+            params: Search parameters used
+            response: API response data
+            route: API route being cached
+            
+        Returns:
+            TTL in seconds
+        """
+        base_ttl = self._route_ttl.get(route, 900)  # 15 minutes default
+        
+        # For search results, analyze content for dynamic TTL
+        if route == '/result':
+            categories = response.get('category', [])
+            total_results = sum(cat.get('records', {}).get('total', 0) for cat in categories)
+            
+            # Shorter TTL for small result sets (more likely to change)
+            if total_results < 10:
+                return base_ttl // 3  # 5 minutes for small result sets
+                
+            # Check for "coming soon" or recently added content
+            for category in categories:
+                records = category.get('records', {})
+                for record_type in ['work', 'article', 'people', 'list']:
+                    for record in records.get(record_type, []):
+                        # Check for recent additions or "coming soon" status
+                        if (record.get('status') == 'coming soon' or 
+                            'recently added' in str(record.get('notes', '')).lower()):
+                            return 300  # 5 minutes for dynamic content
+                            
+            # Longer TTL for bulk harvest (more stable)
+            if params.get('bulkHarvest') == 'true':
+                return base_ttl * 4  # 1 hour for bulk harvest
+                
+            # Check for date-based searches (historical data is more stable)  
+            if any(param.startswith('l-decade') for param in params.keys()):
+                decades = [d for k, v in params.items() 
+                          if k.startswith('l-decade') for d in v.split(',')]
+                if decades and all(int(d) < 200 for d in decades if d.isdigit()):
+                    # Historical data (before 2000s) - very stable
+                    return base_ttl * 8  # 2 hours
+                    
+        return base_ttl
+        
+    def get(self, key: str) -> Any | None:
+        """Get value from cache with statistics tracking."""
+        start_time = time.time()
+        result = self._backend.get(key)
+        
+        if result is not None:
+            self._stats['hits'] += 1
+            # Estimate time saved by cache hit (typical API response time)
+            self._stats['cache_savings_seconds'] += 1.5  
+        else:
+            self._stats['misses'] += 1
+            
+        return result
+        
+    async def aget(self, key: str) -> Any | None:
+        """Async get value from cache with statistics tracking."""
+        start_time = time.time()
+        result = await self._backend.aget(key)
+        
+        if result is not None:
+            self._stats['hits'] += 1
+            self._stats['cache_savings_seconds'] += 1.5
+        else:
+            self._stats['misses'] += 1
+            
+        return result
+        
+    def set(self, key: str, value: Any, ttl: int = None, 
+           search_params: dict = None, route: str = '/result') -> None:
+        """Set value in cache with dynamic TTL calculation.
+        
+        Args:
+            key: Cache key
+            value: Value to cache
+            ttl: Optional explicit TTL (seconds)
+            search_params: Search parameters for dynamic TTL calculation
+            route: API route for TTL calculation
+        """
+        # Determine TTL dynamically if not provided
+        if ttl is None and search_params and route == '/result':
+            ttl = self._determine_search_ttl(search_params, value, route)
+        elif ttl is None:
+            ttl = self._route_ttl.get(route, 900)
+            
+        self._backend.set(key, value, ttl)
+        self._stats['sets'] += 1
+        
+        if route == '/result':
+            self._stats['search_requests'] += 1
+        
+    async def aset(self, key: str, value: Any, ttl: int = None,
+                  search_params: dict = None, route: str = '/result') -> None:
+        """Async set value in cache with dynamic TTL calculation."""
+        if ttl is None and search_params and route == '/result':
+            ttl = self._determine_search_ttl(search_params, value, route)
+        elif ttl is None:
+            ttl = self._route_ttl.get(route, 900)
+            
+        await self._backend.aset(key, value, ttl)
+        self._stats['sets'] += 1
+        
+        if route == '/result':
+            self._stats['search_requests'] += 1
+
+
+def create_cache(backend_type: str, enhanced: bool = False, **kwargs: Any) -> CacheBackend:
     """Factory function for creating cache backends.
     
     Provides a convenient way to create cache backends by name with
@@ -358,6 +529,7 @@ def create_cache(backend_type: str, **kwargs: Any) -> CacheBackend:
     
     Args:
         backend_type: Type of cache backend ("memory", "sqlite", "none")
+        enhanced: Whether to wrap with SearchCacheBackend for search optimization
         **kwargs: Additional keyword arguments for cache backend constructor
         
     Returns:
@@ -370,21 +542,26 @@ def create_cache(backend_type: str, **kwargs: Any) -> CacheBackend:
         >>> # Create memory cache
         >>> cache = create_cache("memory")
         >>> 
-        >>> # Create SQLite cache with custom path
-        >>> from pathlib import Path
-        >>> cache = create_cache("sqlite", db_path=Path("/tmp/cache.db"))
+        >>> # Create enhanced SQLite cache for search
+        >>> cache = create_cache("sqlite", enhanced=True, db_path=Path("/tmp/cache.db"))
         >>> 
         >>> # Create no-op cache
         >>> cache = create_cache("none")
     """
     if backend_type == "memory":
-        return MemoryCache(**kwargs)
+        backend = MemoryCache(**kwargs)
     elif backend_type == "sqlite":
-        return SqliteCache(**kwargs)
+        backend = SqliteCache(**kwargs)
     elif backend_type == "none":
-        return NoCache(**kwargs)
+        backend = NoCache(**kwargs)
     else:
         raise ValueError(
             f"Unknown cache backend: {backend_type}. "
             f"Supported backends: memory, sqlite, none"
         )
+        
+    # Wrap with enhanced functionality if requested
+    if enhanced:
+        backend = SearchCacheBackend(backend)
+        
+    return backend

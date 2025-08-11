@@ -11,6 +11,10 @@ This project contains fragmented documentation for the Trove API v3, designed fo
 
 See [api_docs/CLAUDE.md](./api_docs/CLAUDE.md) for detailed AI agent guidance.
 
+## Implementation Progress
+
+We are currently implementing the library in stages, as outlined in specs/CLAUDE.md
+
 ## Development Setup
 
 ### Prerequisites

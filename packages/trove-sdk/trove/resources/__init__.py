@@ -1,4 +1,5 @@
 """Resource modules for Trove API endpoints."""
 
-# Will be populated in later stages
-__all__ = []
+from .search import SearchResource, SearchResult, PaginationState
+
+__all__ = ['SearchResource', 'SearchResult', 'PaginationState']

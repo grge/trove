@@ -4,10 +4,12 @@ A Python SDK for accessing Australia's National Library Trove API v3. Provides b
 
 ## Features
 
-- **Simple & Pythonic API** - Clean interface for all Trove API operations
+- **Complete Search API** - Support for all 60+ Trove search parameters
+- **Fluent Parameter Builder** - Intuitive, type-safe parameter construction
+- **Smart Pagination** - Single and multi-category pagination support
+- **Enhanced Caching** - Intelligent TTL management and performance statistics
 - **Async & Sync Support** - Use with `asyncio` or traditional synchronous code
 - **Built-in Rate Limiting** - Respectful API usage with token bucket algorithm  
-- **Smart Caching** - Memory and SQLite caching to reduce API calls
 - **Comprehensive Error Handling** - Structured exceptions with automatic retries
 - **Type Hints** - Full type safety with modern Python
 
@@ -45,31 +47,28 @@ The SDK automatically loads `.env` files from your project directory or parent d
 ### Basic Usage
 
 ```python
-from trove import TroveConfig, TroveTransport, MemoryCache
+from trove import TroveConfig, TroveTransport, SearchResource, create_cache
 
 # Configure the client
 config = TroveConfig.from_env()
-cache = MemoryCache()
+cache = create_cache("memory", enhanced=True)
 transport = TroveTransport(config, cache)
+search = SearchResource(transport)
 
 try:
     # Search for books about Australian history
-    response = transport.get('/v3/result', {
-        'category': 'book',
-        'q': 'Australian history',
-        'n': 10,
-        'encoding': 'json'
-    })
+    result = search.page(
+        category=['book'],
+        q='Australian history',
+        l_availability=['y/f'],  # Free online access
+        l_australian='y',        # Australian content
+        n=10
+    )
     
-    # Process results
-    if 'category' in response:
-        category = response['category'][0]
-        total_results = category['records']['total']
-        works = category['records'].get('work', [])
-        
-        print(f"Found {total_results} results")
-        for work in works[:5]:
-            print(f"- {work.get('title', 'Unknown Title')}")
+    print(f"Found {result.total_results} books")
+    works = result.categories[0]['records']['work']
+    for work in works[:5]:
+        print(f"- {work.get('title', 'Unknown Title')}")
 
 finally:
     transport.close()
@@ -126,33 +125,81 @@ config = TroveConfig(
 )
 ```
 
-## API Examples
+## Advanced Search Features
 
-### Search Operations
+### Comprehensive Parameter Support
+
+The SDK supports all 60+ Trove search parameters with full validation:
 
 ```python
-# Basic search
-response = transport.get('/v3/result', {
-    'category': 'book',
-    'q': 'kangaroo',
-    'n': 10
-})
+from trove import SearchResource, ParameterBuilder
 
-# Advanced search with facets
-response = transport.get('/v3/result', {
-    'category': 'newspaper',
-    'q': 'gold rush',
-    'facet': 'decade,state',
-    'l-decade': '190',           # 1900s
-    'n': 20
-})
+# Complex search with multiple filters
+result = search.page(
+    category=['book'],
+    q='Australian literature',
+    l_decade=['200'],              # 2000s publications
+    l_availability=['y/f'],        # Free online access
+    l_australian='y',              # Australian content only
+    l_language=['English'],        # English language
+    facet=['decade', 'format'],    # Request facets
+    include=['tags', 'workversions'], # Extra metadata
+    reclevel='full',               # Full records
+    n=50                           # 50 results per page
+)
 
-# Multiple categories
-response = transport.get('/v3/result', {
-    'category': 'book,article',
-    'q': 'Indigenous Australia',
-    'n': 15
-})
+print(f"Found {result.total_results} books")
+
+# Check facets for refinement
+facets = result.categories[0].get('facets', {}).get('facet', [])
+for facet in facets:
+    print(f"{facet['name']}: {len(facet['term'])} options")
+```
+
+### Fluent Parameter Builder
+
+Use the parameter builder for readable, type-safe searches:
+
+```python
+params = (ParameterBuilder()
+         .categories('newspaper')
+         .query('federation')
+         .decade('190')                    # 1900s
+         .state('NSW', 'VIC')             # Multiple states  
+         .illustrated(True)               # Only illustrated articles
+         .word_count('1000+ Words')       # Long articles only
+         .sort('datedesc')                # Newest first
+         .page_size(25)
+         .build())
+
+result = search.page(params=params)
+```
+
+### Smart Pagination
+
+Iterate through results efficiently with automatic cursor management:
+
+```python
+# Single-category pagination
+total_books = 0
+for page in search.iter_pages(category=['book'], q='poetry', n=100):
+    books = page.categories[0]['records']['work']
+    total_books += len(books)
+    print(f"Page: {len(books)} books, Total: {total_books}")
+
+# Individual record iteration
+for record in search.iter_records(category=['book'], q='novels', n=50):
+    title = record.get('title', 'Untitled')
+    author = record.get('contributor', [{}])[0].get('name', 'Unknown')
+    print(f"{title} by {author}")
+
+# Multi-category pagination (handles complexity automatically)
+for category_code, page in search.iter_pages_by_category(
+    category=['book', 'image'],
+    q='Sydney Harbour Bridge'
+):
+    results = page.categories[0]['records']
+    print(f"{category_code}: {page.total_results} total results")
 ```
 
 ### Individual Records
@@ -175,25 +222,57 @@ person = transport.get('/v3/people/11111', {
 })
 ```
 
-## Caching
+## Enhanced Caching
 
-The SDK includes intelligent caching to reduce API load:
+The SDK includes intelligent caching with search-specific optimizations:
 
 ```python
-from trove.cache import MemoryCache, SqliteCache
+from trove import create_cache
 
-# Memory cache (default, fast but temporary)
-cache = MemoryCache()
+# Enhanced memory cache with statistics
+cache = create_cache("memory", enhanced=True)
 
-# SQLite cache (persistent across sessions)
-cache = SqliteCache()
+# Enhanced SQLite cache for persistent storage
+cache = create_cache("sqlite", enhanced=True, db_path="trove_cache.db")
 
-# Custom SQLite location
-cache = SqliteCache(db_path=Path('/tmp/trove_cache.db'))
+# Access cache statistics
+if hasattr(cache, 'get_stats'):
+    stats = cache.get_stats()
+    print(f"Hit rate: {stats['hit_rate']:.2%}")
+    print(f"Total requests: {stats['total_requests']}")
+    print(f"Time saved: {stats['cache_savings_seconds']:.1f}s")
 
-# No caching
-from trove.cache import NoCache
-cache = NoCache()
+# Configure route-specific TTL
+if hasattr(cache, 'set_route_ttl'):
+    cache.set_route_ttl('/result', 1800)    # 30 min for searches
+    cache.set_route_ttl('/work', 7200)      # 2 hours for works
+```
+
+### Smart TTL Management
+
+The enhanced cache automatically adjusts TTL based on content characteristics:
+
+```python
+# Small result sets get shorter TTL (5 minutes)
+small_result = search.page(
+    category=['book'],
+    q='very specific query',
+    n=5
+)
+
+# Historical data gets longer TTL (2 hours)
+historical_result = search.page(
+    category=['book'],
+    l_decade=['180'],  # 1800s - stable historical data
+    q='history'
+)
+
+# Bulk harvest gets longest TTL (1 hour)
+bulk_result = search.page(
+    category=['book'],
+    bulkHarvest=True,
+    l_australian='y'
+)
 ```
 
 ## Error Handling
@@ -347,6 +426,16 @@ TROVE_LOG_REQUESTS=false
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Changelog
+
+### v2.0.0 (Stage 2 - Complete Search)
+
+- **Complete Search API**: Support for all 60+ Trove search parameters
+- **Fluent Parameter Builder**: Intuitive, type-safe parameter construction
+- **Smart Pagination**: Single and multi-category pagination with cursor management
+- **Enhanced Caching**: Intelligent TTL management and performance statistics
+- **Comprehensive Validation**: Parameter dependencies and constraint checking
+- **Async Pagination**: Full async support for all pagination methods
+- **Multi-category Handling**: Automatic complexity management for multi-category searches
 
 ### v1.0.0 (Stage 1 - Foundation)
 

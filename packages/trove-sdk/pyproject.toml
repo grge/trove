@@ -80,6 +80,7 @@ disallow_untyped_defs = true
 minversion = "7.0"
 addopts = "-ra -q --strict-markers --strict-config"
 testpaths = ["tests"]
+asyncio_mode = "auto"
 markers = [
     "integration: marks tests that require API key and network access",
     "unit: marks tests that run without external dependencies",

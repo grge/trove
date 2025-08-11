@@ -30,7 +30,7 @@ __version__ = "1.0.0"
 
 # Core components
 # Cache backends
-from .cache import CacheBackend, MemoryCache, NoCache, SqliteCache, create_cache
+from .cache import CacheBackend, MemoryCache, NoCache, SqliteCache, SearchCacheBackend, create_cache
 from .config import TroveConfig
 from .exceptions import (
     AuthenticationError,
@@ -45,14 +45,25 @@ from .exceptions import (
     ValidationError,
 )
 
+# Parameters and search
+from .params import SearchParameters, ParameterBuilder, build_limits
 # Rate limiting
 from .rate_limit import RateLimiter, TokenBucket
+# Resources
+from .resources import SearchResource, SearchResult, PaginationState
 from .transport import TroveTransport
 
 __all__ = [
     # Core
     "TroveConfig",
     "TroveTransport",
+    # Parameters and Search
+    "SearchParameters",
+    "ParameterBuilder", 
+    "build_limits",
+    "SearchResource",
+    "SearchResult",
+    "PaginationState",
     # Exceptions
     "TroveError",
     "ConfigurationError",
@@ -68,6 +79,7 @@ __all__ = [
     "CacheBackend",
     "MemoryCache",
     "SqliteCache",
+    "SearchCacheBackend",
     "NoCache",
     "create_cache",
     # Rate limiting
