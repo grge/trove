@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        cd packages/trove-sdk
+        pip install -e ".[dev]"
+    
+    - name: Lint with ruff
+      run: |
+        cd packages/trove-sdk
+        ruff check trove/ tests/
+    
+    - name: Format check with black
+      run: |
+        cd packages/trove-sdk
+        black --check trove/ tests/
+    
+    - name: Type check with mypy
+      run: |
+        cd packages/trove-sdk
+        mypy trove/
+    
+    - name: Test with pytest
+      run: |
+        cd packages/trove-sdk
+        coverage run -m pytest tests/ -v -m "not integration"
+        coverage report --show-missing
+        coverage xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: packages/trove-sdk/coverage.xml
+        fail_ci_if_error: false
+
+  integration-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        cd packages/trove-sdk
+        pip install -e ".[dev]"
+    
+    - name: Run integration tests
+      env:
+        TROVE_API_KEY: ${{ secrets.TROVE_API_KEY }}
+      run: |
+        cd packages/trove-sdk
+        pytest tests/ -v -m integration
+      # Only run if API key is available
+      if: env.TROVE_API_KEY != ''

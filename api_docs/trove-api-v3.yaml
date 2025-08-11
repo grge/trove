@@ -1,0 +1,2729 @@
+openapi: 3.0.3
+info:
+  title: Trove API
+  description: "Trove's Application Programming Interface (API) provides data in a machine-readable form, enabling you to create new applications, tools and interfaces.
+
+
+    ### Access and Terms of Use
+
+
+    Use of the Trove API will require an active API key. See <a href='https://trove.nla.gov.au/about/create-something/using-api#getting-an-api-key' target='_blank'>Getting an API key</a> for instructions on how to obtain a key.
+    Complete the ‘Authorize’ button below to apply your API key to the call when using this interface.
+
+
+    By using any Trove API functionality, you agree to the <a href='https://trove.nla.gov.au/about/create-something/using-api/trove-api-terms-use' target='_blank'>Trove API Terms of Use</a>.
+  
+
+    ### Documentation
+  "
+  termsOfService: https://trove.nla.gov.au/about/create-something/using-api/trove-api-terms-use
+  version: 3.0.0
+servers:
+  - url: '/'
+security:
+  - ApiKey: []
+externalDocs:
+  description: View the full Trove API documentation.
+  url: https://trove.nla.gov.au/about/create-something/using-api
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: X-API-KEY
+      in: header
+      description: Enter your Trove API key to execute a call
+  parameters:
+    q:
+      name: "q"
+      in: query
+      description: 'The search query. Your query can use indexes which let you do things like search for words in the title, or limit your search to items tagged recently. Supported indexes are described here: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#list-of-supported-indexes.'
+      required: false
+      schema:
+        type: string
+    category:
+      name: category
+      in: query
+      description: 'Allows searching in a particular category. Available categories are: "All" (all), "Books & Libraries" (book), "Diaries, Letters & Archives" (diary), "Images, Maps & Artefacts" (image), "Lists" (list), "Magazines & Newsletters" (magazine), "Music, Audio & Video" (music), "Newspapers & Gazettes" (newspaper), "People & Organisations" (people), and "Research & Reports" (research). Use the value in brackets as the category identifier. Multiple categories can be searched by separating them with a comma. If no category is specified, an error occurs. To get a faster response, search only the categories you need.'
+      required: true
+      schema:
+        type: array
+        items:
+          $ref: "#/components/schemas/categories"
+      examples:
+        "All categories":
+          value: [ all ]
+        "Only the 'Books & Libraries' category":
+          value: [ book ]
+        "'Books & Libraries' and 'Images, Maps & Artefacts'":
+          value: [ book,image ]
+    l-format:
+      name: "l-format"
+      in: query
+      description: 'The format of the resource. For example, is it a book or a piece of sheet music?
+      
+                  Applicable categories: book, image, magazine, newspaper, music, diary.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-decade:
+      name: "l-decade"
+      in: query
+      description: 'Publication decade in the format YYY: e.g 199 represents 1990 – 1999.
+
+                  Applicable categories: book, image, magazine, music, diary, newspaper, list.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-year:
+      name: "l-year"
+      in: query
+      description: 'Publication year in the format YYYY. For newspapers, only available if the decade facet is also applied.
+
+                  Applicable categories: book, image, magazine, music, diary, newspaper, list.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-month:
+      name: "l-month"
+      in: query
+      description: 'Publication month. Only available if the year facet is also applied.
+
+                  Applicable categories: newspaper.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-language:
+      name: "l-language"
+      in: query
+      description: 'The language(s) the work is available in. Applicable categories: book, image, magazine, music, diary.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-austlanguage:
+      name: "l-austlanguage"
+      in: query
+      description: 'Aboriginal and Torres Strait Islander Language. Applicable categories: book, image, magazine, music, diary, research.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-contribcollection:
+      name: "l-contribcollection"
+      in: query
+      description: 'The collection the work is available in. Applicable categories: book, image, magazine, music, diary, research.'
+      required: false
+      schema:
+        type: string
+    l-partnerNuc:
+      name: "l-partnerNuc"
+      in: query
+      description: 'The NUC of the contributing partner. Applicable categories: book, image, magazine, music, diary, research.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-artType:
+      name: "l-artType"
+      in: query
+      description: 'The type limit to narrow a search in newspaper category to either "Newspaper" or "Gazette", in the people category to "Person" or "Organisation", and in image category to either "Images and artefacts" or "Maps". Applicable categories: newspaper, image, people.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [newspaper, gazette, images and artefacts, maps, person, organisation]
+    l-geocoverage:
+      name: "l-geocoverage"
+      in: query
+      description: "Place is the geographic region the item is about (geographic coverage) and includes Australian states and territories and a number of Australia's closest International neighbours. Applicable categories: magazine, image, research, book, diary, music."
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-firstAustralians:
+      name: "l-firstAustralians"
+      in: query
+      description: 'Whether the item pertains to First Australians. Applicable categories: book, diary, image, magazine, music, people.'
+      required: false
+      schema:
+        type: string
+        enum: [y]
+    l-culturalSensitivity:
+      name: "l-culturalSensitivity"
+      in: query
+      description: 'An indicator of cultural sensitivity, particularly in respect to First Australians. Applicable categories: book, diary, image, magazine, music, people.'
+      required: false
+      schema:
+        type: string
+        enum: [y]
+    l-availability:
+      name: "l-availability"
+      in: query
+      description: 'Whether the item is online or not: 
+                    y – online;
+                    y/f – freely accessible online;
+                    y/r – payment, subscription or membership required;
+                    y/s – subscription required;
+                    y/u – possibly online.
+                    Replace “/” with %2F (URL encoding).
+                    Applicable categories: book, image, magazine, music, diary.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [ y, y/f, y/r, y/s, y/u ]
+    l-australian:
+      name: "l-australian"
+      in: query
+      description: 'Works identified as published primarily in Australia, or written by Australians.
+                    Applicable categories: book, image, magazine, music, diary, people.'
+      required: false
+      schema:
+        type: string
+        enum: [y]
+    l-occupation:
+      name: "l-occupation"
+      in: query
+      description: 'Applicable categories: diary, people.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-zoom:
+      name: "l-zoom"
+      in: query
+      description: 'Map scale. Applicable categories: image.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-audience:
+      name: "l-audience"
+      in: query
+      description: 'Only applies to articles from Gale. Applicable categories: book, music, research and image.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [ Trade, General, Academic, Professional, "Children's", "Children's - Upper elementary", "Children's - Lower elementary" ]
+    l-title:
+      name: "l-title"
+      in: query
+      description: 'The newspaper or gazette title id; or the magazine, newsletter, research or report title. Applicable categories: newspaper, magazine, research.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-category:
+      name: "l-category"
+      in: query
+      description: 'Newspaper or gazette article category. Examples include: "Article", "Advertising","Detailed Lists, Results, Guides", "Family notices", "Literature", "Government Gazette Notices", "Government Gazette Tenders and Contracts", "Government Gazette Proclamations And Legislation", "Government Gazette Private Notices", "Government Gazette Budgetary Papers", "Government Gazette Index And Contents", "Government Gazette Appointments And Employment", "Government Gazette Freedom Of Information". Applicable categories: magazine, newspaper.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-illustrated:
+      name: "l-illustrated"
+      in: query
+      description: 'Is an article illustrated? Applicable categories: magazine, newspaper, research.'
+      required: false
+      schema:
+        type: boolean
+    l-illustrationType:
+      name: "l-illustrationType"
+      in: query
+      description: 'Type of illustration for an article. Applicable categories: magazine, newspaper, research.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-wordCount:
+      name: "l-wordCount"
+      in: query
+      description: 'The article word count. Applicable categories: newspaper, magazine, research. E.g. one of "<100 Words", "100 - 1000 Words", "1000+ Words".'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [<100 Words, 100 - 1000 Words, 1000+ Words]
+    l-state:
+      name: "l-state"
+      in: query
+      description: 'State of publication for newspaper or gazette article. Applicable categories: newspaper.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-place:
+      name: "l-place"
+      in: query
+      description: 'The place of birth (for people) or establishment (for organisations). Applicable categories: people.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-birth:
+      name: "l-birth"
+      in: query
+      description: 'Year of Birth/Establishment in the format YYYY. Applicable categories: people.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    l-death:
+      name: "l-death"
+      in: query
+      description: 'Year of Death/Dissolution in the format YYYY. Applicable categories: people.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+    otherLimits:
+      name: "otherLimits"
+      in: query
+      description: 'Limit the search results using one or more limits/facets. e.g. l-availability=Y&l-year=1881. This field allows additional limits to those defined as individual parameters in this API specification (e.g. for use with faceting).'
+      required: false
+      explode: true
+      style: simple
+      schema:
+        title: otherLimits
+        type: object
+        additionalProperties: true
+    s:
+      name: "s"
+      in: query
+      description: "The default value to start from i.e. s=*
+
+                  You will receive a CursorMark value called 'nextStart' in your results if there are more pages of results. Use this 'nextStart' value with the 's' parameter to get to the next page of results and page through a long list of results i.e.
+                    
+                  s=AoIIPyteOSlzdTczOTQ2MjQ=
+                  
+                  Please note: the ‘s’ parameter must be URL encoded."
+      required: false
+      schema:
+        type: string
+        default: '*'
+    n:
+      name: "n"
+      in: query
+      description: "The number of results to return per category. Maximum is 100."
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sortby:
+      name: "sortby"
+      in: query
+      description: "The sort order for the results. Both date of publication and relevance are supported."
+      required: false
+      schema:
+        type: string
+        enum: [ datedesc, dateasc, relevance ]
+        default: relevance
+    bulkHarvest:
+      name: "bulkHarvest"
+      in: query
+      description: "Include this parameter if you intend to harvest a set of records for further processing in your own system. The results will be sorted by identifier, rather than relevance. This will prevent your results set order changing while you harvest, and ensure you obtain every record once. If the value is 'true', article/work identifier is used to sort. If the value is 'false' relevance score is used to sort."
+      required: false
+      schema:
+        type: boolean
+        default: false
+    reclevel:
+      name: "reclevel"
+      in: query
+      description: Indicates whether to return a full or brief metadata record.
+      required: false
+      schema:
+        $ref: "#/components/schemas/recLevel"
+    encoding:
+      name: "encoding"
+      in: query
+      description: Get the response in xml (default) or json. Alternately, specify a HTTP accept content type of application/xml or application/json.
+      required: false
+      schema:
+        type: string
+        enum: [ json, xml ]
+        default: xml
+    facet:
+      name: "facet"
+      in: query
+      description: 'Facets are categories that describe the results for your search. For example, if you ask for the decade facet, the response will include the list of decades your results span across, and how many results are found in each decade. 
+                    You can separate multiple values with commas.
+                    
+                    Some facets only apply to certain categories. A maximum number of values will be returned, which varies per facet.'
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+        externalDocs:
+          description: Supported facets are described here.
+          url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#facetValues
+  schemas:
+    work:
+      xml:
+        name: work
+      type: object
+      properties:
+        id:
+          type: string
+          description: The Trove work id
+          example: 123456789
+          xml:
+            attribute: true
+        url:
+          type: string
+          description: A link to view this article in the Trove API.
+          xml:
+            attribute: true
+        troveUrl:
+          type: string
+          description: A link to view this article in the Trove web interface.
+        title:
+          type: string
+          description: The title or name of the work.
+          example: "Tangled : the essential guide to Rapunzel’s world / written by Barbara Bazaldua"
+        contributor:
+          type: array
+          items:
+            type: string
+          xml:
+            wrapped: false
+          description: The main creator of this work. Some works have multiple creators listed, others have only one even if multiple creators exist.
+          example: 'Bazaldua, Barbara'
+        issued:
+          type: string
+          description: The year/s this work was issued, created or published. May also include month and day. May be a range.
+          example: 2011, 2001-2011
+        type:
+          type: array
+          items:
+            $ref: "#/components/schemas/formats"
+          description: The format of this work. There may be more than one type element.
+        isPartOf:
+          type: array
+          items:
+            $ref: "#/components/schemas/isPartOf"
+          description: For articles, the journal or periodical this article belongs to (if known). The url may include the API access point to get more information about this periodical e.g. /work/13110632.
+        subject:
+          type: array
+          items:
+            type: string
+          description: Subjects describe what a work is about.
+          example: Global warming - Health aspects.
+        abstract:
+          type: string
+          description: A description, summary, abstract, or first few words of this work, if available.
+          example: Damaged rainforest trees in a backyard in Babinda.
+        audience:
+          type: array
+          items:
+            type: string
+          description: The target audience of the work
+        rights:
+          type: array
+          items:
+            type: string
+          description: The terms of use of the work
+        format:
+          type: array
+          items:
+            type: string
+          description: The physical format of the item
+        extent:
+          type: string
+          description: The extent of the work
+        spatial:
+          type: array
+          description: The spatial topic of the item. e.g. the location a photograph was taken
+          items:
+            $ref: "#/components/schemas/spatial"
+        placeOfPublication:
+          type: array
+          items:
+            type: string
+          description: The place of publication of this work
+          example: 'Australia/New South Wales'
+        snippet:
+          type: array
+          items:
+            type: string
+          description: A small amount of text containing one or more of the search terms. The matching term/s are enclosed in a <B> element
+          example: '...blue-green plumage holding the <B>tangled</B> loops. A very useful dress it composed of a plaided material...'
+        tableOfContents:
+          type: string
+          description: A table of contents for this work, if available. Where possible, each item is listed on a separate line within the same tableOfContents element.
+        language:
+          type: array
+          items:
+            $ref: "#/components/schemas/language"
+          description: The language/s this work is available in. More than one language element may be present.
+        wikipedia:
+          type: string
+          description: Links to any known associated wikipedia articles. Includes markup.
+          example: 'Read associated articles: <a href=”http://en.wikipedia.org/wiki/Golomb_coding”> Golomb coding</a>, <a href=”http://en.wikipedia.org/wiki/Incremental_encoding”> Incremental encoding</a>'
+        hasCorrections:
+          type: string
+          enum: [ Y,N ]
+          description: Does the work have any text corrections?
+        relevance:
+          $ref: "#/components/schemas/relevance"
+        lastUpdated:
+          type: string
+          description: The date of the most recent text correction (UTC timezone).
+          example: 2011-12-09T09:43:00Z
+        holdingsCount:
+          type: integer
+          description: The number of organisations (libraries, archives, etc) who have a copy of this work.
+        versionCount:
+          type: integer
+          description: A work is made up of one or more versions. This is the number of versions that are grouped together to make up this work.
+        tagCount:
+          type: array
+          items:
+            $ref: "#/components/schemas/itemCount"
+          description: Tags can be placed on the work as a whole, or on a particular version that is part of the work. This element shows the number of public tags on this work or any of its versions. There is no way to access private tags through the API.
+        commentCount:
+          type: array
+          items:
+            $ref: "#/components/schemas/itemCount"
+          description: Comments can be placed on the work as a whole, or on a particular version that is part of the work. This element shows the number of public comments on this work or any of its versions.
+        listCount:
+          type: integer
+          description: The number of public lists this work is in.
+        tag:
+          type: array
+          items:
+            $ref: "#/components/schemas/tag"
+          description: A public tag added to the work. There may be more than one tag element. Tags can also be added to a version (the version/tag element).
+        comment:
+          type: array
+          items:
+            $ref: "#/components/schemas/comment"
+          description: A public comment added to the work. There may be more than one comment element. Comments can also be added to a version (the version/comment element).
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/list"
+          description: The name of a public, user-created list this work belongs to. There may be more than one list element.
+        identifier:
+          type: array
+          items:
+            $ref: "#/components/schemas/identifier"
+          description: Additional identifiers for the work.
+        culturallySensitive:
+          type: string
+          description: An indicator of cultural sensitivity, particularly in respect to First Australians.
+        firstAustralians:
+          type: string
+          description: Whether the item pertains to First Australians.
+        holding:
+          type: array
+          items:
+            $ref: "#/components/schemas/holding"
+          description: A container element for information about a copy of this work held by a particular organisation (library, archive, etc).
+        version:
+          description: A container element for a version/edition that is part of this work. Versions usually contain one record but can sometimes contain several.
+          type: array
+          items:
+            $ref: "#/components/schemas/version"
+
+    version:
+      xml:
+        name: version
+      type: object
+      properties:
+        id:
+          type: string
+          description: A string of internal Trove ids for any records that make up this version.
+          xml:
+            attribute: true
+        record:
+          type: array
+          description: Container element for a Dublin Core record. These records are contributed to Trove from various sources and have often been converted by Trove or the original contributor to Dublin Core from other formats.
+          items:
+            $ref: "#/components/schemas/record"
+        type:
+          type: array
+          items:
+            $ref: "#/components/schemas/formats"
+          description: The format of this version. There may be more than one type element.
+          example: Book/Illustrated
+        issued:
+          type: array
+          items:
+            type: string
+          description: The date this version was issued/published/created. Either YYYY or YYYY-MM or YYYY-MM-DD.
+          example: 1980-01-31
+        holdingsCount:
+          type: integer
+          description: The number of institutions (libraries, archives, etc) who have or control a copy of this work.
+        tagCount:
+          description: The number of public tags on this version (not including tags placed at the work level).
+          $ref: "#/components/schemas/itemCount"
+        commentCount:
+          description: The number of public comments on this version (not including comments placed at the work level).
+          $ref: "#/components/schemas/itemCount"
+        tag:
+          type: array
+          items:
+            $ref: "#/components/schemas/tag"
+          description: A public tag added to the version. There may be more than one tag element. Tags can also be added to a version (the version/tag element).
+        comment:
+          type: array
+          items:
+            $ref: "#/components/schemas/comment"
+          description: A public comment added to the version. There may be more than one comment element. Comments can also be added to a version (the version/comment element).
+        identifier:
+          type: array
+          items:
+            $ref: "#/components/schemas/identifier"
+          description: Additional identifiers for the version.
+        culturallySensitive:
+          type: string
+          description: An indicator of cultural sensitivity, particularly in respect to First Australians.
+        firstAustralians:
+          type: string
+          description: Whether the item pertains to First Australians.
+        holding:
+          type: array
+          items:
+            $ref: "#/components/schemas/holding"
+          description: A container element for information about a copy of this version held by a particular organisation (library, archive, etc).
+
+    people:
+      xml:
+        name: people
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for this person/organisation.
+          xml:
+            attribute: true
+        url:
+          type: string
+          description: A link to view this article in the Trove API.
+          xml:
+            attribute: true
+        troveUrl:
+          type: string
+          description: A link to view this article in the Trove web interface.
+        type:
+          type: string
+          enum: [ person, corporatebody, family ]
+        relevance:
+          $ref: "#/components/schemas/relevance"
+        primaryName:
+          type: string
+          description: The person/organisation's primary name with, life dates (where applicable)
+        primaryDisplayName:
+          type: string
+          description: The person/organisation's primary name without life dates
+        alternateName:
+          type: array
+          items:
+            type: string
+          description: Other name(s) that the person/organisation's is/are known by, with life dates (where applicable)
+        alternateDisplayName:
+          type: array
+          items:
+            type: string
+          description: Other name(s) that the person/organisation's is/are known by, without life dates
+        identifier:
+          type: array
+          items:
+            $ref: "#/components/schemas/identifier"
+          description: Additional identifiers for the person/organisation.
+        disambiguation:
+          type: boolean
+          description: Disambiguation information for a person or organisation, to help distinguish people or organisations with the same or similar name
+        disambiguationName:
+          type: array
+          description: Disambiguation names and relation (e.g. 'is not')
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The related disambiguation name.
+              url:
+                type: string
+                description: A link to the related person/organisation record.
+              reltype:
+                type: string
+                description: The type of relationship between the two person/organisation records (e.g. may refer to, is not, etc).
+              reldesc:
+                type: string
+                description: More information about the relationship between the records.
+        title:
+          type: array
+          description: Title associated with the person or organization including post-nominals and titles of status to show the awards and honours a person has (not available for organisations)
+          items:
+            type: string
+        occupation:
+          type: array
+          description: One or more occupations describing the person (not available for organisations)
+          items:
+            type: string
+        contributor:
+          type: array
+          description: The name of the contributor of this person or organisation record to Trove
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The Trove contributor id
+                xml:
+                  attribute: true
+              nuc:
+                type: string
+                description: The Trove contributor Nuc. Nuc (id) of the contributor of the person or organisation record to Trove
+                xml:
+                  attribute: true
+              name:
+                type: string
+                description: The Trove contributor name. Name of the contributor of the person or organisation record to Trove
+              url:
+                type: string
+                description: The Trove contributor Url. A link to access the person or organisation record through the contributing organisation’s external website
+        biography:
+          type: array
+          description: A written account of the persons life or brief history of the organisation. Some Trove people and organisation records include multiple biographies contributed by various Trove partners/contributors
+          items:
+            type: object
+            properties:
+              contributor:
+                type: string
+                description: The Trove contributor name. Name of the contributor of the person or organisation biography to Trove
+              contributorId:
+                type: string
+                description: The Trove contributorId. Id of the contributor of the person or organisation biography to Trove
+                xml:
+                  attribute: true
+              id:
+                type: string
+                description: The URL id for the biography. URL identifier for the person or organization biography on the contributors website
+              biography:
+                type: string
+                description: Container element for the biography record for each person or organization biography contributed to Trove
+        record:
+          type: array
+          description: Container element for a Dublin Core or EAC-CPF record. These records are contributed to Trove from various sources and have often been converted by Trove or the original contributor to Dublin Core from other formats.
+          items:
+            $ref: "#/components/schemas/record"
+        tagCount:
+          type: integer
+          description: The number of public tags this person/organisation is in.
+        commentCount:
+          type: integer
+          description: The number of public comments this person/organisation has.
+        listCount:
+          type: integer
+          description: The number of public lists this person/organisation is in.
+        tag:
+          type: array
+          items:
+            $ref: "#/components/schemas/tag"
+        comment:
+          type: array
+          items:
+            $ref: "#/components/schemas/comment"
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/list"
+        culturallySensitive:
+          type: string
+          description: An indicator of cultural sensitivity, particularly in respect to First Australians.
+        firstAustralians:
+          type: string
+          description: Whether the item pertains to First Australians.
+
+    list:
+      xml:
+        name: list
+      type: object
+      properties:
+        id:
+          type: string
+          description: The Trove list id.
+          example: 21922
+          xml:
+            attribute: true
+        url:
+          type: string
+          description: A URL to retrieve more information about this list using the Trove API.
+          example: https://api.trove.nla.gov.au/v3/list/21922
+          xml:
+            attribute: true
+        lastupdated:
+          type: string
+          description: When the list was most recently added/edited (UTC timezone).
+          example: 2011-12-09T09:43:00Z
+          xml:
+            attribute: true
+        by:
+          type: string
+          description: The username of the person who created the list
+          example: '“public:bobbyfamilytree”;
+                  “dance” (NLA staff accounts do not include the ‘public’ prefix);
+                  “anonymous” (no user account identified)'
+          xml:
+            attribute: true
+        troveUrl:
+          type: string
+          description: A link to view this list in the Trove web interface.
+          example: https://trove.nla.gov.au/list?id=1234
+        title:
+          type: string
+          description: The name of the list. List names are not unique. Display them in conjunction with the list creator’s username.
+          example: Adelaide Festival of the Arts (1960 – )
+        description:
+          type: string
+          description: Brief record (truncated to 120 characters); Full record (full value).
+          example: <p><em>Furioso</em> premiered on 8 July 1993 at the Playhouse, Adelaide Festival Centre. It was choreographed by Meryl Tankard for Meryl Tankard Australian Dance Theatre. The original cast was Prue Lang, Mia Mason, Rachel Roberts, Tuula Roppola, Michelle Ryan, Vincent Crowley, Grayson Millwood, Shaun Parker, Gavin Webber and Steev Zane. It was danced to music by Arvo Part, Elliot Sharp and Henryk Gorecki, and had designs by Regis Lansac.</p>
+        creator:
+          type: string
+          description: The username of the person who created the list. Anonymous lists are not allowed.
+        listItemCount:
+          type: integer
+          description: The number of items in the list.
+        identifier:
+          $ref: "#/components/schemas/identifier"
+          description: A link to a thumbnail image for the list.
+        date:
+          type: object
+          properties:
+            created:
+              type: string
+              description: When the record was created (UTC timezone).
+              example: 2009-12-31T13:00:00Z
+              xml:
+                attribute: true
+            lastupdated:
+              type: string
+              description: When the record was last changed (UTC timezone).
+              example: 2010-09-06T05:07:41Z
+              xml:
+                attribute: true
+        relevance:
+          $ref: "#/components/schemas/relevance"
+        tagCount:
+          $ref: "#/components/schemas/itemCount"
+          description: The number of tags on this list.
+        commentCount:
+          $ref: "#/components/schemas/itemCount"
+          description: The number of comments on this list.
+        snippet:
+          type: array
+          items:
+            type: string
+          description: A small amount of article text containing one or more of the search terms. The matching term/s are enclosed in a <B> element.
+          example: '...blue-green plumage holding the <B>tangled</B> loops. A very useful dress it composed of a plaided material...'
+        tag:
+          type: array
+          items:
+            $ref: "#/components/schemas/tag"
+          description: A public tag added to the work. There may be more than one tag element.
+        comment:
+          type: array
+          items:
+            $ref: "#/components/schemas/comment"
+          description: A public comment on this list. There may be more than one comment element.
+        listItem:
+          type: array
+          items:
+            $ref: "#/components/schemas/listItem"
+          description: 'An item that belongs to the list. This may be a work, a digitised newspaper article, a person/organisation, or a link to an external website. There may be more than one listItem element. A list item will contain one of the following elements: work, article, externalWebsite, people. It may also contain a note.'
+
+    listItem:
+      xml:
+        name: listItem
+      type: object
+      properties:
+        note:
+          type: string
+          description: A note the creator of the list wrote about this item, such as why they decided to include it, or extra description of the item.
+          example: Henry Thomas Byrnes Death Notice
+        work:
+          $ref: "#/components/schemas/work"
+          description: A brief record for a work that belongs to this list.
+        article:
+          $ref: "#/components/schemas/article"
+          description: A brief record for a digitised newspaper article that belongs to this list.
+        externalWebsite:
+          type: object
+          properties:
+            title:
+              type: string
+              description: The name of the webpage.
+              example: Google
+            identifier:
+              type: array
+              items:
+                $ref: "#/components/schemas/identifier"
+              description: The URL of the webpage.
+            relevance:
+              $ref: "#/components/schemas/relevance"
+          description: Information about a link to page outside of Trove that has been included in this list.
+        people:
+          $ref: "#/components/schemas/people"
+          description: A very brief record for a person or organisation that belongs to this list.
+        deleted:
+          type: object
+          description: Indicator to show whether the item has been recently deleted from Trove
+          properties:
+            deleted:
+              type: string
+              description: "The status of the linked record ('deleted')."
+            value:
+              type: string
+              description: "The reason the linked record is not available ('The resource described by this item has been deleted from Trove')."
+        culturallySensitive:
+          type: string
+          description: An indicator of cultural sensitivity, particularly in respect to First Australians.
+        firstAustralians:
+          type: string
+          description: Whether the item pertains to First Australians.
+
+    article:
+      xml:
+        name: article
+      type: object
+      properties:
+        id:
+          type: string
+          description: Trove newspaper article id.
+          example: 18341291
+          xml:
+            attribute: true
+        url:
+          type: string
+          description: Trove newspaper url.
+          example: 18341291
+          xml:
+            attribute: true
+        identifier:
+          type: string
+          description: The article identifier. This URL leads to the article view on the Trove web interface.
+          example: https://nla.gov.au/nla.news-article18341291
+        heading:
+          type: string
+          description: The article heading
+          example: Agriculture around Kelvin Grove and Kedron Brook. [BY OUR AGRICULTURAL REPORTER.]
+        category:
+          type: string
+          enum: [ Article, Advertising, 'Detailed lists, results, guides', Family Notices, Literature, Government Gazette Notices, Government Gazette Tenders and Contracts, Government Gazette Proclamations And Legislation, Government Gazette Private Notices, Government Gazette Budgetary Papers, Government Gazette Index And Contents, Government Gazette Appointments And Employment, Government Gazette Freedom Of Information ]
+          description: The type of article. Displayed on the Trove web interface as “Category”
+        title:
+          description: The name of the newspaper or periodical this article is found in.
+          $ref: "#/components/schemas/articleTitle"
+        edition:
+          type: string
+          description: 'If this article appeared in a special newspaper/periodical edition, the name of that edition is included here. In the Trove web interface, this is shown on the page view. e.g. https://trove.nla.gov.au/ndp/del/page/4298413'
+          example: '2, SPECIAL EDITION TO THE QUEANBEYAN AGE'
+        date:
+          type: string
+          description: When the issue this article belongs to was published. YYYY-MM-DD.
+          example: 1876-05-27
+        page:
+          type: string
+          description: Determine the sequence of delivery of the pages in an issue.
+          example: 1
+        pageSequence:
+          type: string
+          description: In addition to the page sequence number, indicates if the article is part of a supplement/section (displayed in the Trove web interface)
+          example: 1 S
+        pageLabel:
+          type: string
+          description: Sometimes used to indicate what is printed on the page, or perhaps the page number within a section/supplement. Not displayed in the Trove web interface. Sometimes numeric and sometimes not.
+          example: Front cover
+        status:
+          type: string
+          enum: [ coming soon, withdrawn, currently unavailable ]
+          description: 'Included if the article is not currently available. Not included for normal articles. New articles are included before they are fully approved. These articles have a status of “coming soon”. They don’t include the full text or a link to view the article in Trove. They may be deleted from Trove. If you want to harvest newspaper articles into your own system, you may prefer to only harvest those added more than a month ago, as most articles which are “coming soon” will be approved within this timeframe. If you do harvest any articles which are “coming soon” you will need to check back later to find out whether they still exist/have been approved/get the Trove link and full text.'
+        relevance:
+          $ref: "#/components/schemas/relevance"
+        snippet:
+          type: string
+          description: A small amount of article text containing one or more of the search terms. The matching term/s are enclosed in a <B> element
+          example: '...blue-green plumage holding the <B>tangled</B> loops. A very useful dress it composed of a plaided material...'
+        troveUrl:
+          type: string
+          description: 'A link to view this article in the Trove web interface. If this record was retrieved in response to a search, the search terms will be included in the URL which allows them to be highlighted when viewing in the article. This is not available for articles with a status of "coming soon". The persistent id for this article can be found in the identifier element. (It does not support search term highlighting).'
+          example: https://trove.nla.gov.au/ndp/del/article/18342701?searchTerm=tangled
+        trovePageUrl:
+          type: string
+          description: A link to view the first page of this article, in the Trove web interface. This is not available for articles with a status of “coming soon”.
+          example: https://trove.nla.gov.au/ndp/del/page/2243685
+        supplement:
+          type: string
+          description: The newspaper/periodical section this article appeared in. In the Trove web interface, this is shown on the page view. A supplement is part of an issue.
+          example: Something to do
+        section:
+          type: string
+          description: The newspaper/periodical section this article appeared in. In the Trove web interface, this is shown on the page view. A section is part of an issue.
+          example: 1, Special Home Feature
+        illustrated:
+          type: string
+          enum: [ Y,N ]
+          description: Flags whether the article is illustrated or not
+        wordCount:
+          type: string
+          description: The number of words in the full text of the article
+          example: 1514
+        correctionCount:
+          type: string
+          description: The number of corrections made to the article. Each correction may involve many lines.
+          example: 1
+        tagCount:
+          type: string
+          description: The number of public tags added to this article by Trove users.
+        commentCount:
+          type: string
+          description: The number of public comments added to this article by Trove users.
+        listCount:
+          type: string
+          description: The number of  public Trove user created lists this article has been added to.
+        tag:
+          type: array
+          items:
+            $ref: "#/components/schemas/tag"
+          description: A public tag added to the article. There may be more than one tag element.
+        comment:
+          type: array
+          items:
+            $ref: "#/components/schemas/comment"
+          description: A public comment added to the article. There may be more than one comment element.
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/list"
+          description: The name of a public, user created list this article belongs to. There may be more than one list element
+        lastCorrection:
+          type: object
+          description: Further information about the most recent correction to this article. The correction itself is not included.
+          properties:
+            by:
+              type: string
+              description: The username of the person who made the most recent correction to this article, or “anonymous”
+            lastupdated:
+              type: string
+              description: When the most recent correction was made to this article (UTC timezone)
+              example: 2011-12-06T18:05:17Z
+        pdf:
+          type: array
+          items:
+            type: string
+          description: A link leading to the pdf for the page this article appears on. There may be more than one pdf element if the article appears over multiple pages. PDFs are not available for some articles, such as the Australian Women’s Weekly, and articles with a status of “coming soon”.
+          example: https://trove.nla.gov.au/ndp/imageservice/nla.news-page2243325/print
+        articleText:
+          type: string
+          description: The full text of the article, including all corrections. Article paragraphs are enclosed in a <p> element.  Lines are enclosed by <span>. Article text is not available for some articles, such as those from the Australian Women’s Weekly, and articles with a status of “coming soon”. For these articles, there will be no articleText element present.
+          example: '<p><span>  SHIPPING  INTELLIGENCE.</span></p> <p><span>  Lying  in  Owen’s  Anchorage.-II.M.S.  Pelorus,</span><span>  and  Champion»</span></p>'
+        warning:
+          type: string
+          description: A message to indicate if a newspaper article is not present in the newspaper database, but exists in the Trove index
+
+    magazineTitle:
+      xml:
+        name: magazine
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/articleTitle"
+
+    articleTitle:
+      xml:
+        name: newspaper
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the newspaper or gazette title.
+          xml:
+            attribute: true
+        title:
+          type: string
+          description: Name of the newspaper (or magazine, gazette)
+          example: 'The Canberra Times (ACT : 1926-1954)'
+        state:
+          type: string
+          enum: [ International, National, ACT, New South Wales, Northern Territory, Queensland, South Australia, Tasmania, Victoria, Western Australia ]
+          description: The state the newspaper or gazette was primarily published in.
+        issn:
+          type: string
+          description: International Standard Serial Number
+          example: 01576925
+        publisher:
+          type: string
+          description: The name of the publisher, where available
+        place:
+          type: array
+          items:
+            type: string
+          description: Place is the geographic region the item is about (geographic coverage) and includes Australian states and territories and a number of Australia's closest International neighbours
+          example: [New South Wales]
+        alternateTitles:
+          type: array
+          items:
+            type: string
+          description: Other names for this title
+        troveUrl:
+          type: string
+          description: A link to view this newspaper or gazette title in Trove
+          example: https://trove.nla.gov.au/ndp/del/title/11
+        startDate:
+          type: string
+          description: The publication date of the easliest issue of this newspaper available in Trove, in the format YYYY-MM-DD.
+          example: 1926-09-03
+        endDate:
+          type: string
+          description: The publication date of the  most recently issue of this newspaper or gazette available in Trove, in the format YYYY-MM-DD.
+          example: 1954-12-31
+        year:
+          type: array
+          description: A list of the  publication years for this newspaper or gazette that are included in Trove.
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                description: A year this newspaper or gazette title was published, in the format YYYY.
+                example: 1926
+                xml:
+                  attribute: true
+              issuecount:
+                type: integer
+                description: The number of issues  published in this year.
+                example: 18
+                xml:
+                  attribute: true
+              issue:
+                type: array
+                description: Information about a particular issue of this newspaper or gazette
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Issue id
+                      example: 3863
+                      xml:
+                        attribute: true
+                    date:
+                      type: string
+                      description: Date this issue was published, the format YYYY-MM-DD
+                      example: 1926-09-03
+                      xml:
+                        attribute: true
+                    url:
+                      type: string
+                      description: URL to view this issue in Trove
+                      example: https://trove.nla.gov.au/ndp/del/issue/3863
+                      xml:
+                        attribute: true
+
+    contributor:
+      xml:
+        name: contributor
+      type: object
+      properties:
+        id:
+          type: string
+          description: Either the contributor's NUC or a numeric id.
+          example: ANL
+          xml:
+            attribute: true
+        url:
+          type: string
+          description: The contributor's Trove API url
+          example: https://api.trove.nla.gov.au/v3/contributor/ANL
+          xml:
+            attribute: true
+        name:
+          type: string
+          description: The contributor's name
+          example: National Library of Australia
+        nuc:
+          type: string
+          description: The contributor's NUC
+          example: ANL
+        shortname:
+          type: string
+          description: A shorter version of the contributor's name
+          example: NLA
+        totalholdings:
+          type: integer
+          description: The total number of holders the contributor has
+          example: 123
+        accesspolicy:
+          type: string
+          description: The contributor's access conditions
+          example: Open to the public
+        homepage:
+          type: string
+          description: The contributor's web page
+          example: https://nla.gov.au
+        algentry:
+          type: string
+          description: The url to contributor's ALG entry
+        parent:
+          type: object
+          description: The contributor's parent institution, if there is one
+          properties:
+            id:
+              type: string
+              description: The identifier of the parent institution.
+              xml:
+                attribute: true
+            url:
+              type: string
+              description: The parent institution's Trove API url.
+              xml:
+                attribute: true
+            name:
+              type: string
+              description: The parent institution's name.
+        children:
+          type: array
+          description: The contributor's child institutions, if there are any
+          items:
+            $ref: "#/components/schemas/contributor"
+
+    record:
+      xml:
+        name: record
+      type: object
+      properties:
+        header:
+          type: object
+          properties:
+            identifier:
+              type: string
+              description: Unique identifier number or value for contributors for each record contributed to Trove
+            datestamp:
+              type: string
+              description: Datestamp for each record indicating the date of creation, modification or deletion of the record in Trove
+            setSpec:
+              type: string
+              description: Optional unique value for contributors to group records contributed to Trove as a set
+        metadata:
+          type: object
+          properties:
+            dc:
+              $ref: "#/components/schemas/dcRecord"
+            eac-cpf:
+              type: object
+              additionalProperties: true
+              description: The EAC-CPF record, processed into a structure compatible with the OpenAPI specification. See https://eac.staatsbibliothek-berlin.de/ for details of the EAC-CPF schema.
+            rawXml:
+              type: string
+              description: 'When the "raweaccpf" Include option has been selected, this field will contain the original, unprocessed and unformatted EAC-CPF record that corresponds to the above processed eac-cpf element. Applicable categories: people.'
+        metadataSource:
+          type: object
+          properties:
+            value:
+              type: string
+              description: The name of the organisation or aggregating service who contributed this record to Trove (e.g. Libraries Australia).
+            type:
+              type: string
+              description: The NUC symbol of the organisation who contributed this this record to Trove.
+              xml:
+                attribute: true
+          description: A related resource from which the described resource is derived, for example the print book from which an image was scanned.
+
+    dcRecord:
+      type: object
+      description: Container element for a Dublin Core record
+      externalDocs:
+        url: https://trove.nla.gov.au/partners/partner-services/adding-collections-trove/trove-data-dictionary
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+          description: A name given to the resource.
+        type:
+          type: array
+          description: The nature or genre of the resource.
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The nature or genre of the resource.
+              type:
+                type: string
+                description: Used to identify which Trove category the item belongs in (e.g. book, thesis, audio, video, chart, diagram, etc).
+                xml:
+                  attribute: true
+        alternative:
+          type: array
+          description: The alternate name (alternative title) for the item
+          items:
+            type: string
+        creator:
+          type: array
+          description: An entity primarily responsible for making the resource. Examples of a Creator include a person, an organisation, or a service.
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the entity.
+              type:
+                type: string
+                description: The type of entity (e.g. author, illustrator).
+                xml:
+                  attribute: true
+        contributor:
+          type: array
+          description: An entity responsible for making contributions to the resource. Examples of a Contributor include a person, an organisation, or a service.
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The name of the entity.
+              type:
+                type: string
+                description: 'The type of contributor. Examples include: conferenceOrganiser, owner, photographer.'
+                xml:
+                  attribute: true
+        issued:
+          type: array
+          description: Date of formal issuance (e.g., publication) of the resource. ISO-8601 format dates are used, ie yyyy-mm-dd.
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The date.
+              type:
+                type: string
+                description: The type of issuance
+                xml:
+                  attribute: true
+        description:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The description text.
+              type:
+                type: string
+                description: 'The type of description. Examples include: byline, fulltext, open_fulltext, scale.'
+                xml:
+                  attribute: true
+          description: An account of the resource. Description may include an abstract, a byline or a free-text account of the resource. When the fulltext of an article is available, include it in a description field with the additional attribute type=”fulltext”. Trove will index this text (return the record for a search on a word in the fulltext) but only display the first 200 characters. Users will need to visit your site to view the fulltext. Trove will only index the first 30,000 characters of a description field.
+        date:
+          type: array
+          items:
+            type: string
+          description: A point or period of time associated with an event in the lifecycle of the resource. ISO-8601 format dates are used, ie yyyy-mm-dd.
+        coverage:
+          type: array
+          items:
+            type: string
+          description: The spatial or temporal topic of the resource, the spatial applicability of the resource, or the jurisdiction under which the resource is relevant. Spatial topic and spatial applicability may be a named place or a location specified by its geographic coordinates. Temporal topic may be a named period, date, or date range. A jurisdiction may be a named administrative entity or a geographic place to which the resource applies. Use of a controlled vocabulary is encouraged but not mandatory.
+        subject:
+          type: array
+          description: The topic of the content of the resource. Use of a controlled vocabulary such as the Australian Pictorial Thesaurus, LCSH or the Australian Extension to LCSH is encouraged but not mandatory.
+          items:
+            type: string
+        format:
+          type: array
+          description: The physical format of the item
+          items:
+            type: string
+        extent:
+          type: array
+          items:
+            type: string
+          description: The size or duration of the resource, e.g. the number of pages, size of a computer file or length of a sound recording.
+        audience:
+          type: array
+          items:
+            type: string
+          description: A class of entity for whom the resource is intended or useful, e.g. Academic, Professional
+        abstract:
+          type: array
+          description: A description, summary, abstract, or first few words of this work, if available.
+          items:
+            type: string
+        tableOfContents:
+          type: string
+          description: A list of subunits of the resource, e.g. Book chapter headings. This field is split on “-- “ and displayed as a list.
+        language:
+          type: array
+          description: A language of the resource. ISO-639-2 is preferred (3 letter language codes). Plain text can also be used. If your system keeps ISO-639-1 language codes, combines a language with a country code (ISO-3166), or uses another standard please let the Trove team know at setup time. A special mapping will be applied to your data. Austlang (Aboriginal and Torres Strait Islander languages) codes may be added to this field as described at Austlang Codes.
+          externalDocs:
+            url: https://trove.nla.gov.au/austlang-codes
+            description: Austlang Codes
+          items:
+            $ref: "#/components/schemas/language"
+        temporal:
+          type: array
+          description: Temporal characteristics of the resource. This can be a year, date range or named period.
+          items:
+            type: string
+        publisher:
+          type: array
+          description: An entity responsible for making the resource available. Examples of a publisher include a person, an organisation, or a service. Typically, the name of a publisher should be used to indicate the entity.
+          items:
+            type: string
+        references:
+          type: array
+          description: The URL of a related resource that is referenced, cited, or otherwise pointed to by the described resource.
+          items:
+            type: string
+        relation:
+          type: array
+          description: A related resource; a version of the work, or a significant part of the work. Recommended best practice is to reference the resource by means of a string or number conforming to a formal identification system, for example a permanent URL. ARC or NHMRC grant numbers can also be entered as a permanent URL.
+          items:
+            type: string
+        medium:
+          type: array
+          description: The material or physical carrier of the resource.
+          items:
+            type: string
+        licenseRef:
+          type: array
+          description: A URL pointing to a licence – ideally human and machine readable – that explains the terms for use or re-use of the content. RightsStatements.org URLs need to point to the Persistant link to the statement. URLs from Creative Commons and RightsStatements.org are used to populate the rights facets in Trove.
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The licence URL.
+              startDate:
+                type: string
+                description: the date at which these licence conditions begin to apply
+                xml:
+                  attribute: true
+        identifier:
+          type: array
+          description: A local system identifier OR A URL to the resource, a version of the resource, or a related item. For long-term viability of the record a permanent URL such as a handle or purl should be used, rather than a system-specific URL. Include the linktype attribute will give Trove further data about the nature of the resource available, and should be included with all URLs.
+          items:
+            $ref: "#/components/schemas/identifier"
+        spatial:
+          type: array
+          items:
+            $ref: "#/components/schemas/spatial"
+          description: Spatial characteristics of the resource, e.g. the location a photograph was taken; can also be used to include MARC Geographic Area Codes (GAC) to apply place facets.
+        isPartOf:
+          type: array
+          description: A related resource in which the described resource is physically or logically included, e.g. a photograph or manuscript collection
+          items:
+            $ref: "#/components/schemas/isPartOf"
+        bibliographicCitation:
+          type: array
+          description: 'A bibliographic reference for the resource. Recommended practice is to include sufficient bibliographic detail to identify the resource as unambiguously as possible.'
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The citation text.
+              type:
+                type: string
+                description: 'The type of citation.  Examples of bibliographic citation types include: publication, volume, issue, pagination, edition, eisbn, isbn, issn, dateIssues, placeOfPub, sourceCreator, dateIssued, yearIssued.'
+                xml:
+                  attribute: true
+        rights:
+          type: array
+          description: Information about rights held in and over the resource. Copyright should be asserted if known. Free text or a URI is acceptable e.g. link to a Creative Commons licence. For better display in Trove a standard licence should be included in the Licence Ref element instead. Rights statements starting with a Creative Commons or RightsStatements.org URI will populate the rights facet with appropriate data.
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The rights statement.
+              type:
+                type: string
+                description: The type of rights statement (e.g. metadata).
+                xml:
+                  attribute: true
+        freeToRead:
+          type: array
+          description: 'Indicates an Open Access item. Including the free_to_read element indicates any user can freely access the full item online without authenticating or having to pay. No content is required in this tag, its presence indicates an item is Open Access and its absence indicates an item is not Open Access.'
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                description: The free to read statement, if present.
+              startDate:
+                type: string
+                xml:
+                  attribute: true
+                description: the date on which an item becomes free to read, for example when an embargo is lifted. This date should be in ISO-8601 format, ie yyyy-mm-dd.
+              endDate:
+                type: string
+                xml:
+                  attribute: true
+                description: the date on which the item ceases to be free to read, for example when a free trial period ends. This date should be in ISO-8601 format, ie yyyy-mm-dd.
+        viewcopy:
+          type: array
+          items:
+            type: string
+          description: The URL of a medium sized version of the image hosted on your server.
+
+    holding:
+      type: object
+      description: A container element for information about a copy of this work held by a particular organisation (library, archive, etc).
+      properties:
+        nuc:
+          type: string
+          description: The NUC symbol of an organisation with a copy of this work.
+          example: NWU
+          xml:
+            attribute: true
+        contributor:
+          type: string
+          description: 'The Trove API URL to the Contributor who owns this holding.'
+          example: /contributor/VSL
+          xml:
+            attribute: true
+        name:
+          type: string
+          description: The name of an organisation which controls a copy of this work. Provided instead of a NUC symbol for organisations which do not have one assigned.
+          example: Internet Archive
+          xml:
+            attribute: true
+        library:
+          type: string
+          description: In future, this will be the API access point to look up more information about this organisation.
+          example: /library/NWU
+          xml:
+            attribute: true
+        url:
+          type: object
+          description: The best available link is shown.
+          properties:
+            type:
+              type: string
+              enum: [ deepLink, homepage, catalogue ]
+              description: '“deepLink” – a link to view this item in the holding institution’s catalogue/website.
+                            “catalogue” – a link to the holding institution’s  catalogue home page.
+                            “homepage” – a link to the organisation’s homepage'
+              xml:
+                attribute: true
+            value:
+              type: string
+              description: The url.
+        callNumber:
+          description: The institution’s call number for their copy of the work.
+          type: array
+          items:
+            type: object
+            properties:
+              localIdentifier:
+                type: string
+                description: Also provided if available. From Libraries Australia MARC records, this is extracted from 850$b.
+                xml:
+                  attribute: true
+              value:
+                type: string
+                description: The call number.
+
+    language:
+      type: object
+      description: The language(s) the item is available in
+      properties:
+        value:
+          type: string
+          description: Language name or code of the item
+        type:
+          type: string
+          description: Language code or standard used to describe the item
+          xml:
+            attribute: true
+
+    spatial:
+      type: object
+      description: The spatial topic of the item. e.g. the location a photograph was taken
+      properties:
+        value:
+          type: string
+          description: Geographic place name or code for the item
+        scheme:
+          type: string
+          description: Geographic place code or standard used to describe the item
+          xml:
+            attribute: true
+
+    identifier:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [ url, isbn, ismn, issn, control number ]
+          description: The type of the link
+          example: url
+          xml:
+            attribute: true
+        linktype:
+          type: string
+          enum: [ fulltext, restricted, subscription, unknown, notonline, thumbnail, viewcopy, 'searchable resource', 'metadata record', mediated ]
+          description: Describes the type of content available at the url, for type='url' identifiers
+          externalDocs:
+            description: Additional information on possible linktypes
+            url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#list-of-possible-linktype-values
+          xml:
+            attribute: true
+        url:
+          type: string
+          description: 'Depending on the linktype: 
+                        The best known link to this work is included automatically in the brief record (if available); or
+                        A link to access this work through a particular organisation’s subscription; or
+                        A link to a thumbnail-sized image representing this item (if available)'
+          example: 'http://bishop.slq.qld.gov.au/webclient/DeliveryManager?pid=282557'
+          xml:
+            attribute: true
+        linktext:
+          type: string
+          description: Link label, for type='url' identifiers
+          example: View online
+          xml:
+            attribute: true
+        nuc:
+          type: string
+          description: The NUC symbol for the organisation that has the subscription, for linktype='subscription' identifiers.
+          example: NWU
+          xml:
+            attribute: true
+        library:
+          type: string
+          description: In future will be the API access point for more information about the organisation that has the subscription.
+          example: /library/ABS
+          xml:
+            attribute: true
+        source:
+          type: string
+          description: The source of the identifier, for for type='control number' identifiers
+          example: AuCNLKIN
+          xml:
+            attribute: true
+        value:
+          type: string
+          description: The value of the identifier. Will vary depending on the type and linktype properties.
+
+    relevance:
+      type: object
+      properties:
+        score:
+          type: number
+          description: A numeric representation of how relevant this record is to the search. This number can be compared to other search results in this category, but not to results from other categories.
+          example: 0.009942865
+          xml:
+            attribute: true
+        value:
+          type: string
+          enum: [ very relevant, likely to be relevant, may have relevance, limited relevance, vaguely relevant ]
+          description: How relevant the record is to the search
+
+    comment:
+      type: object
+      properties:
+        lastupdated:
+          type: string
+          description: When the comment was most recently added/edited (UTC timezone).
+          example: 2011-12-09T09:43:00Z
+          xml:
+            attribute: true
+        by:
+          type: string
+          description: The username of the person who added the comment.
+          example: '“public:bobbyfamilytree”;
+                  “rholley” (NLA staff accounts do not include the ‘public’ prefix);
+                  “anonymous” (no user account identified)'
+          xml:
+            attribute: true
+        rating:
+          type: string
+          description: An optional rating of the item from 0 to 5.
+          example: 5
+          xml:
+            attribute: true
+        value:
+          type: string
+          description: A public comment added to the work. There may be more than one comment element. Comments can also be added to a version (the version/comment element).
+          example: Have any names been listed as to who is in the photo?
+
+    tag:
+      type: object
+      properties:
+        lastupdated:
+          type: string
+          description: When the tag was added (UTC timezone).
+          example: 2011-12-12T15:44:01Z
+          xml:
+            attribute: true
+        value:
+          type: string
+          description: A public tag added to the work. There may be more than one tag element. Tags can also be added to a version (the version/tag element).
+          example: lightning
+
+    itemCount:
+      type: object
+      description: Generic object representing a structure with a count and an optional level attribute (e.g. work -> tagCount)
+      properties:
+        level:
+          type: string
+          enum: [ work, version ]
+          description: The record level that encapsulates the counted items (either 'work' or 'version').
+          xml:
+            attribute: true
+        value:
+          type: integer
+          description: The count.
+
+    isPartOf:
+      type: object
+      description: A related resource in which the described resource is physically or logically included, e.g. a photograph or manuscript collection. For articles, the journal or periodical the article belongs to (if known)
+      properties:
+        value:
+          type: string
+          description: The related resource.
+        url:
+          type: string
+          description: The Trove API URL to the related resource.
+          xml:
+            attribute: true
+        type:
+          type: string
+          description: The type of related resource (e.g. series).
+          xml:
+            attribute: true
+
+    contributorSearchResult:
+      xml:
+        name: response
+      type: object
+      properties:
+        total:
+          type: integer
+          description: The number of matching Contributors.
+          xml:
+            attribute: true
+        contributor:
+          type: array
+          description: The list of matching Contributors.
+          items:
+            $ref: "#/components/schemas/contributor"
+
+    titleSearchResult:
+      xml:
+        name: response
+      type: object
+      properties:
+        total:
+          type: integer
+          description: The number of matching titles.
+          xml:
+            attribute: true
+        newspaper:
+          type: array
+          description: The list of matching Newspaper or Gazette titles (where applicable).
+          items:
+            $ref: "#/components/schemas/articleTitle"
+        magazine:
+          type: array
+          description: The list of matching Magazine or Newsletter titles (where applicable).
+          items:
+            $ref: "#/components/schemas/magazineTitle"
+
+    searchResult:
+      xml:
+        name: response
+      type: object
+      properties:
+        query:
+          type: string
+          description: The original search term
+        category:
+          type: array
+          items:
+            $ref: "#/components/schemas/searchResultCategory"
+
+    searchResultCategory:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The unique system identifier for the category (corresponds to the 'category' search parameter; e.g. book).
+          xml:
+            attribute: true
+        name:
+          type: string
+          description: The human-readable name of the category (e.g. Books & Libraries).
+          xml:
+            attribute: true
+        records:
+          $ref: "#/components/schemas/searchResultRecords"
+        facets:
+          type: object
+          properties:
+            facet:
+              type: array
+              items:
+                $ref: "#/components/schemas/searchResultFacet"
+
+    searchResultRecords:
+      type: object
+      properties:
+        s:
+          type: string
+          description: The current page's cursor mark.
+          xml:
+            attribute: true
+        n:
+          type: number
+          description: The current page size.
+          xml:
+            attribute: true
+        total:
+          type: number
+          description: The total number of results.
+          xml:
+            attribute: true
+        next:
+          type: string
+          description: The complete URL to retrieve the next page of results.
+          xml:
+            attribute: true
+        nextStart:
+          type: string
+          description: The cursorMark for the next page of results.
+          xml:
+            attribute: true
+        work:
+          type: array
+          description: The list of Work results (where applicable).
+          items:
+            $ref: "#/components/schemas/work"
+        article:
+          type: array
+          description: The list of Article results (where applicable).
+          items:
+            $ref: "#/components/schemas/article"
+        people:
+          type: array
+          description: The list of Person/Organisation results (where applicable).
+          items:
+            $ref: "#/components/schemas/people"
+        list:
+          type: array
+          description: The list of List results (where applicable).
+          items:
+            $ref: "#/components/schemas/list"
+        item:
+          type: array
+          description: A container entity to be used when bulkHarvest = true and category = all.
+          items:
+            type: object
+            properties:
+              work:
+                $ref: "#/components/schemas/work"
+              article:
+                $ref: "#/components/schemas/article"
+              people:
+                $ref: "#/components/schemas/people"
+              list:
+                $ref: "#/components/schemas/list"
+
+    searchResultFacet:
+      type: object
+      description: Facets are categories that describe all the records in a particular result set.
+      properties:
+        name:
+          type: string
+          description: The unique system name of the facet (e.g. publicationplace).
+          xml:
+            attribute: true
+        displayname:
+          type: string
+          description: The human-readable name of the facet (e.g. Place of Publication).
+          xml:
+            attribute: true
+        term:
+          type: array
+          description: The list of possible values for the facet.
+          items:
+            $ref: "#/components/schemas/searchResultFacetTerm"
+
+    searchResultFacetTerm:
+      type: object
+      description: A particular value for a given facet.
+      properties:
+        count:
+          type: integer
+          format: int64
+          description: The number of records in the search result that match this facet term.
+          xml:
+            attribute: true
+        url:
+          type: string
+          description: The Trove API URL to perform a search using this facet term.
+          xml:
+            attribute: true
+        search:
+          type: string
+          description: The facet value used in the corresponding limit field i.e. l-<limit>. Facet values are often case-sensitive, so be sure to use the value exactly as provided.
+        display:
+          type: string
+          description: The facet value used for display (usually same as 'Search' value)
+        term:
+          type: array
+          description: The facet value to retrieve in search results
+          items:
+            $ref: "#/components/schemas/searchResultFacetTerm"
+
+    imagesResult:
+      type: object
+      xml:
+        name: images
+      properties:
+        workId:
+          type: string
+          description: The requested parent work object id
+        count:
+          type: integer
+          description: The number of images available for this resource.
+        images:
+          type: array
+          description: The ordered list of images available for this resource.
+          items:
+            type: object
+            properties:
+              imageId:
+                type: string
+                description: The NLA Object Identifier of the image.
+              culturallySensitive:
+                type: string
+                description: An indicator of cultural sensitivity, particularly in respect to First Australians.
+              title:
+                type: string
+                description: The title of the image, where available
+              order:
+                type: integer
+                description: The order of the image within the parent work, where applicable.
+
+    error:
+      type: object
+      xml:
+        name: error
+      properties:
+        statusCode:
+          type: integer
+          description: The HTTP status code.
+          example: 404
+        statusText:
+          type: string
+          description: The HTTP status reason phrase.
+          example: Not Found
+        description:
+          type: string
+          description: A brief description of the error.
+          example: A matching record could not be found.
+
+    recLevel:
+      type: string
+      enum: [ full, brief ]
+      default: brief
+
+    categories:
+      type: string
+      description: Supported categories for searching the Trove API.
+      enum:
+        - all # Everything except the Web
+        - book # Books & Libraries
+        - diary # Diaries, Letters & Archives
+        - image # Images, Maps & Artefacts
+        - list  # Lists
+        - magazine # Magazines & Newsletters
+        - music # Music, Audio & Video
+        - newspaper # Newspapers & Gazettes
+        - people # People & Organisations
+        - research # Research & Reports
+
+    formats:
+      type: string
+      enum:
+        - Archived website
+        - Art work
+        - Article
+        - Article/Abstract
+        - Article/Book chapter
+        - Article/Conference paper
+        - Article/Journal or magazine article
+        - Article/Other article
+        - Article/Report
+        - Article/Review
+        - Article/Working paper
+        - Audio book
+        - Book
+        - Book/Braille
+        - Book/Illustrated
+        - Book/Large print
+        - Conference Proceedings
+        - Data set
+        - Government publication
+        - Map
+        - Map/Aerial photograph
+        - Map/Atlas
+        - Map/Braille
+        - Map/Electronic
+        - Map/Globe or object
+        - Map/Large print
+        - Map/Map series
+        - Map/Microform
+        - Map/Single map
+        - Microform
+        - Object
+        - Periodical
+        - Periodical/Journal, magazine, other
+        - Periodical/Newspaper
+        - Photograph
+        - Poster, chart, other
+        - Printed music
+        - Published
+        - Sheet music
+        - Sound
+        - Sound/Interview, lecture, talk
+        - Sound/Other sound
+        - Sound/Recorded music
+        - Thesis
+        - Unpublished
+        - Video
+        - Video/Captioned
+tags:
+  - name: Search
+    description: Search
+  - name: Work
+    description: Works
+  - name: People
+    description: People and Organisations
+  - name: Newspaper
+    description: Newspapers and Gazettes
+  - name: List
+    description: Lists
+  - name: Contributor
+    description: Contributors
+paths:
+  /v3/result:
+    get:
+      operationId: search
+      tags:
+        - Search
+      description: 'Search Trove newspaper, gazette and magazine articles, people, lists and works. Works are made up of “versions”. They can be books, images, maps, music, sound, video, archives, or journal articles. Archived websites have not been included at this point.
+                     
+
+                    A simple search request looks basically like this: <https://api.trove.nla.gov.au/v3/result?key=<**INSERT KEY**>&category=<**CATEGORY NAME**>&q=<**YOUR SEARCH TERMS**>
+                    
+                    
+                    By default, you will only get a brief metadata record that does NOT include information like tags, comments, full text, library holdings, links etc. If you want this information, you will need to use the "reclevel" and "include" parameters which are described below. If you don’t want this information for every record in your results, you can retrieve metadata for individual records instead.
+
+
+                    As a general principle, it is better to only ask the API for the information you need – this will give you and all the other Trove users a more responsive service. Also note that the various limit fields are often case-sensitive: the best way to determine the correct value is to first perform a facet search for that field.
+
+
+                    Note: the current best method for finding records with certain licences is a search with the licence URL, e.g. q=https://creativecommons.org
+                    '
+      parameters:
+        - $ref: "#/components/parameters/category"
+        - $ref: "#/components/parameters/q"
+        - $ref: "#/components/parameters/l-artType"
+        - $ref: "#/components/parameters/l-availability"
+        - $ref: "#/components/parameters/l-audience"
+        - $ref: "#/components/parameters/l-australian"
+        - $ref: "#/components/parameters/l-birth"
+        - $ref: "#/components/parameters/l-category"
+        - $ref: "#/components/parameters/l-contribcollection"
+        - $ref: "#/components/parameters/l-culturalSensitivity"
+        - $ref: "#/components/parameters/l-death"
+        - $ref: "#/components/parameters/l-decade"
+        - $ref: "#/components/parameters/l-firstAustralians"
+        - $ref: "#/components/parameters/l-format"
+        - $ref: "#/components/parameters/l-geocoverage"
+        - $ref: "#/components/parameters/l-illustrated"
+        - $ref: "#/components/parameters/l-illustrationType"
+        - $ref: "#/components/parameters/l-language"
+        - $ref: "#/components/parameters/l-austlanguage"
+        - $ref: "#/components/parameters/l-year"
+        - $ref: "#/components/parameters/l-month"
+        - $ref: "#/components/parameters/l-occupation"
+        - $ref: "#/components/parameters/l-partnerNuc"
+        - $ref: "#/components/parameters/l-place"
+        - $ref: "#/components/parameters/l-state"
+        - $ref: "#/components/parameters/l-title"
+        - $ref: "#/components/parameters/l-wordCount"
+        - $ref: "#/components/parameters/l-zoom"
+        - $ref: "#/components/parameters/otherLimits"
+        - $ref: "#/components/parameters/s"
+        - $ref: "#/components/parameters/n"
+        - $ref: "#/components/parameters/sortby"
+        - $ref: "#/components/parameters/bulkHarvest"
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/facet"
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [ all, comments, holdings, links, listitems, lists, subscribinglibs, tags, workversions ]
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#api-search
+      responses:
+        "200":
+          description: A successful search
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/searchResult"
+              example: '{ "query": "Australian Prime Ministers", "category": [ { "code": "book", "name": "Books & Libraries", "records": { "s": "*", "n": 1, "total": 219185, "next": "https://api.trove.nla.gov.au/v3/v3%2Fresult%3Fkey%3D#####%26category%3Dbook%26q%3DAustralian%2520Prime%2520Ministers%26s%3D%252A%26n%3D1%26sortBy%3Drelevance%26bulkHarvest%3Dfalse%26reclevel%3Dbrief%26encoding%3Djson?s=AoIIRPXGZypzdTMyNDExODI5", "nextStart": "AoIIRPXGZypzdTMyNDExODI5", "work": [ { "id": "32411829", "url": "https://api.trove.nla.gov.au/v3/work/32411829", "troveUrl": "https://trove.nla.gov.au/work/32411829", "title": "Australian prime ministers / edited by Michelle Grattan", "contributor": [ "Grattan, Michelle" ], "issued": "1900-2020", "type": [ "Book", "Book/Illustrated", "Object" ], "hasCorrections": "N", "relevance": { "score": 1966.2000732421875, "value": "very relevant" }, "holdingsCount": 224, "versionCount": 17 } ] } } ] }'
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/searchResult"
+              example: '<response> <query>Australian Prime Ministers</query> <category code="book" name="Books &amp; Libraries"> <records s="*" n="1" total="219185" next="https://api.trove.nla.gov.au/v3/v3%2Fresult%3Fkey%3D#####%26category%3Dbook%26q%3DAustralian%2520Prime%2520Ministers%26s%3D%252A%26n%3D1%26sortBy%3Drelevance%26bulkHarvest%3Dfalse%26reclevel%3Dbrief%26encoding%3Dxml?s=AoIIRPXGZypzdTMyNDExODI5" nextStart="AoIIRPXGZypzdTMyNDExODI5"> <work id="32411829" url="https://api.trove.nla.gov.au/v3/work/32411829"> <troveUrl>https://trove.nla.gov.au/work/32411829</troveUrl> <title>Australian prime ministers / edited by Michelle Grattan</title> <contributor>Grattan, Michelle</contributor> <issued>1900-2020</issued> <type>Book</type> <type>Book/Illustrated</type> <type>Object</type> <hasCorrections>N</hasCorrections> <relevance score="1966.2000732421875"> <value>very relevant</value> </relevance> <holdingsCount>224</holdingsCount> <versionCount>17</versionCount> </work> </records> </category> </response>'
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+
+  /v3/work/{workId}:
+    get:
+      operationId: getWork
+      tags:
+        - Work
+      description: Retrieves a specific Work record
+      responses:
+        "200":
+          description: The work was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/work"
+              example: '{ "id": "32411829", "url": "https://api.trove.nla.gov.au/v3/work/32411829", "troveUrl": "https://trove.nla.gov.au/work/32411829", "title": "Australian prime ministers / edited by Michelle Grattan", "contributor": [ "Grattan, Michelle" ], "issued": "1900-2020", "type": [ "Book", "Book/Illustrated", "Object" ], "hasCorrections": "N", "holdingsCount": 224, "versionCount": 17 }'
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/work"
+              example: '<work id="32411829" url="https://api.trove.nla.gov.au/v3/work/32411829"> <troveUrl>https://trove.nla.gov.au/work/32411829</troveUrl> <title>Australian prime ministers / edited by Michelle Grattan</title> <contributor>Grattan, Michelle</contributor> <issued>1900-2020</issued> <type>Book</type> <type>Book/Illustrated</type> <type>Object</type> <hasCorrections>N</hasCorrections> <holdingsCount>224</holdingsCount> <versionCount>17</versionCount> </work>'
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "workId"
+          description: The ID of the work to retrieve
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [ all, comments, holdings, links, lists, subscribinglibs, tags, workversions ]
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#api-get-metadata-records
+
+  /v3/magazine/titles:
+    get:
+      operationId: findMagazineTitles
+      tags:
+        - Work
+      description: Search for Magazine and Newsletter titles
+      responses:
+        200:
+          description: The Title search was successful
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/titleSearchResult"
+              example: '{ "total": 2492, "magazine": [ { "id": "nla.obj-2526944948", "title": "... Annual report of the Canned Fruits Control Board for the year ...", "troveUrl": "https://nla.gov.au/work/nla.obj-2526944948", "startDate": "1927-01-01 00:00:00.0" }, { "id": "nla.obj-244631375", "title": "..." } ] }'
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/titleSearchResult"
+              example: '<response total="2492"> <magazine id="nla.obj-2526944948"> <title>... Annual report of the Canned Fruits Control Board for the year ...</title> <troveUrl>https://nla.gov.au/work/nla.obj-2526944948</troveUrl> <startDate>1927-01-01 00:00:00.0</startDate> </magazine> <magazine id="nla.obj-244631375"> <title>......</title> </magazine> </response>'
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: place
+          description: Place is the geographic region the item is about (geographic coverage) and includes Australian states and territories and a number of Australia's closest International neighbours.
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: offset
+          description: The index to start retrieving results from. The first record is at index 0.
+          required: false
+          in: query
+          schema:
+            default: 0
+            type: integer
+        - name: limit
+          description: The number of records to retrieve. The default is 20, the maximum is 100.
+          required: false
+          in: query
+          schema:
+            default: 20
+            type: integer
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#get-a-list-of-magazines-and-newsletters-titles
+
+  /v3/magazine/title/{id}:
+    get:
+      operationId: getMagazineTitle
+      tags:
+        - Work
+      description: Retrieves a specific magazine or newsletter title
+      responses:
+        200:
+          description: The magazine or newsletter title was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/magazineTitle"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/magazineTitle"
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the magazine or newsletter title to retrieve. This can be the Trove ID or the NLA Object Identifier (nla.obj-#####)
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: "include"
+          description: Return a list of years this title was published (Only lists years included in Trove)
+          required: false
+          in: query
+          schema:
+            type: string
+            enum: [years]
+        - name: "range"
+          description: If include=years has also been used, then for the given date range, also return a list of dates an issue of this title was published. The range must be specified in the format YYYYMMDD-YYYYMMDD (url-encoded).
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#get-information-about-one-magazine-or-newsletter-title
+
+  /v3/people/{id}:
+    get:
+      operationId: getPersonOrOrg
+      tags:
+        - People
+      description: Retrieves a specific Person or Organisation record
+      responses:
+        "200":
+          description: The person/org was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/people"
+              example: '{ "id": "551057", "url": "https://api.trove.nla.gov.au/v3/people/551057", "troveUrl": "https://trove.nla.gov.au/people/551057", "type": "person", "primaryName": "Barton, Edmund, (Sir) (1849-1920)", "primaryDisplayName": "Edmund Barton", "title": [ "Sir" ], "occupation": [ "Federationist", "Prime Minister", "Judge" ] }'
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/people"
+              example: '<people id="551057" url="https://api.trove.nla.gov.au/v3/people/551057"> <troveUrl>https://trove.nla.gov.au/people/551057</troveUrl> <type>person</type> <primaryName>Barton, Edmund, (Sir) (1849-1920)</primaryName> <primaryDisplayName>Edmund Barton</primaryDisplayName> <title>Sir</title> <occupation>Federationist</occupation> <occupation>Prime Minister</occupation> <occupation>Judge</occupation> </people>'
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the Person or Organisation to retrieve
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [ all, comments, lists, raweaccpf, tags ]
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#api-people-and-organisation-record-structure
+
+  /v3/list/{id}:
+    get:
+      operationId: getList
+      tags:
+        - List
+      description: Retrieves a specific List
+      responses:
+        "200":
+          description: The list was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/list"
+              example: '{ "id": "32141", "url": "https://api.trove.nla.gov.au/v3/list/32141", "troveUrl": "https://trove.nla.gov.au/list?id=32141", "title": "Australian Prime Ministers", "description": "particularly births, marriages (and children) and deaths", "creator": "public:Drewy", "listItemCount": 21 }'
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/list"
+              example: '<list id="32141" url="https://api.trove.nla.gov.au/v3/list/32141"> <troveUrl>https://trove.nla.gov.au/list?id=32141</troveUrl> <title>Australian Prime Ministers</title> <description>particularly births, marriages (and children) and deaths</description> <creator>public:Drewy</creator> <listItemCount>21</listItemCount> </list>'
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the List to retrieve
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [ all, comments, listitems, tags ]
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#api-list-record-structure
+
+  /v3/newspaper/{id}:
+    get:
+      operationId: getNewspaperArticle
+      tags:
+        - Newspaper
+      description: Retrieves a specific Newspaper article
+      responses:
+        "200":
+          description: The article was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/article"
+              example: '{ "id": "152471373", "url": "https://api.trove.nla.gov.au/v3/newspaper/152471373", "heading": "AUSTRALIAN PRIME MINISTERS VIEWS", "category": "Article", "title": { "id": "742", "title": "Daily Telegraph (Launceston, Tas. : 1883 - 1928)" }, "date": "1912-09-27", "page": "5", "pageSequence": "5", "troveUrl": "https://trove.nla.gov.au/ndp/del/article/152471373" }'
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/article"
+              example: '<article id="152471373" url="https://api.trove.nla.gov.au/v3/newspaper/152471373"> <heading>AUSTRALIAN PRIME MINISTERS VIEWS</heading> <category>Article</category> <title id="742"> <title>Daily Telegraph (Launceston, Tas. : 1883 - 1928)</title> </title> <date>1912-09-27</date> <page>5</page> <pageSequence>5</pageSequence> <troveUrl>https://trove.nla.gov.au/ndp/del/article/152471373</troveUrl> </article>'
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the Article to retrieve
+          required: true
+          in: path
+          schema:
+            type: integer
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [ all, articletext, comments, lists, tags ]
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#api-newspaper-and-gazette-article-record-structure
+
+  /v3/newspaper/titles:
+    get:
+      operationId: findNewspaperTitles
+      tags:
+        - Newspaper
+      description: Search for Newspaper titles
+      responses:
+        "200":
+          description: The Title search was successful
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/titleSearchResult"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/titleSearchResult"
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: state
+          description: Limit the title search to the specified state(s)
+          required: false
+          in: query
+          schema:
+            default: all
+            type: string
+            enum: [ nsw, act, qld, tas, sa, nt, wa, vic, national, international ]
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#listTitles
+
+  /v3/newspaper/title/{id}:
+    get:
+      operationId: getNewspaperTitle
+      tags:
+        - Newspaper
+      description: Retrieves a specific newspaper title
+      responses:
+        "200":
+          description: The newspaper title was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/articleTitle"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/articleTitle"
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the newspaper title to retrieve
+          required: true
+          in: path
+          schema:
+            type: integer
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: string
+            enum: [ years ]
+        - name: "range"
+          description: If include=years has also been used, then for the given date range, also return a list of dates an issue of this title was published. The range must be specified in the format YYYYMMDD-YYYYMMDD (url-encoded).
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#get-information-about-one-newspaper-or-gazette-title
+
+  /v3/gazette/{id}:
+    get:
+      operationId: getGazetteArticle
+      tags:
+        - Newspaper
+      description: Retrieves a specific Gazette article
+      responses:
+        "200":
+          description: The article was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/article"
+              example: '{ "id": "152471373", "url": "https://api.trove.nla.gov.au/v3/newspaper/152471373", "heading": "AUSTRALIAN PRIME MINISTERS VIEWS", "category": "Article", "title": { "id": "742", "title": "Daily Telegraph (Launceston, Tas. : 1883 - 1928)" }, "date": "1912-09-27", "page": "5", "pageSequence": "5", "troveUrl": "https://trove.nla.gov.au/ndp/del/article/152471373" }'
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/article"
+              example: '<article id="152471373" url="https://api.trove.nla.gov.au/v3/newspaper/152471373"> <heading>AUSTRALIAN PRIME MINISTERS VIEWS</heading> <category>Article</category> <title id="742"> <title>Daily Telegraph (Launceston, Tas. : 1883 - 1928)</title> </title> <date>1912-09-27</date> <page>5</page> <pageSequence>5</pageSequence> <troveUrl>https://trove.nla.gov.au/ndp/del/article/152471373</troveUrl> </article>'
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the Article to retrieve
+          required: true
+          in: path
+          schema:
+            type: integer
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [ all, articletext, comments, lists, tags ]
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#api-newspaper-and-gazette-article-record-structure
+
+  /v3/gazette/titles:
+    get:
+      operationId: findGazetteTitles
+      tags:
+        - Newspaper
+      description: Search for Gazette titles
+      responses:
+        "200":
+          description: The Title search was successful
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/titleSearchResult"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/titleSearchResult"
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: state
+          description: Limit the title search to the specified state(s)
+          required: false
+          in: query
+          schema:
+            default: all
+            type: string
+            enum: [ nsw, national, international ]
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#listTitles
+
+  /v3/gazette/title/{id}:
+    get:
+      operationId: getGazetteTitle
+      tags:
+        - Newspaper
+      description: Retrieves a specific gazette title
+      responses:
+        "200":
+          description: The gazette was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/articleTitle"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/articleTitle"
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the gazette title to retrieve
+          required: true
+          in: path
+          schema:
+            type: integer
+        - name: "include"
+          description: Include optional pieces of information in the records returned.
+          required: false
+          in: query
+          schema:
+            type: string
+            enum: [ years ]
+        - name: "range"
+          description: If include=years has also been used, then for the given date range, also return a list of dates an issue of this title was published. The range must be specified in the format YYYYMMDD-YYYYMMDD (url-encoded).
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#get-information-about-one-newspaper-or-gazette-title
+
+  /v3/contributor:
+    get:
+      operationId: findContributors
+      tags:
+        - Contributor
+      description: Search for Contributors
+      responses:
+        "200":
+          description: The Contributor search was successful
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/contributorSearchResult"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/contributorSearchResult"
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "q"
+          description: The search query.
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url:  https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#contrib
+
+  /v3/contributor/{id}:
+    get:
+      operationId: getContributor
+      tags:
+        - Contributor
+      description: Retrieves a specific Contributor
+      responses:
+        "200":
+          description: The Contributor was successfully retrieved
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/contributor"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/contributor"
+        default:
+          description: Any unsuccessful response will be returned as an error object.
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/error"
+            "application/xml":
+              schema:
+                $ref: "#/components/schemas/error"
+      parameters:
+        - name: "id"
+          description: The ID of the contributor to retrieve
+          required: true
+          in: path
+          schema:
+            type: string
+        - $ref: "#/components/parameters/reclevel"
+        - $ref: "#/components/parameters/encoding"
+      externalDocs:
+        url: https://trove.nla.gov.au/about/create-something/using-api/v3/api-technical-guide#get-information-about-one-contributor
