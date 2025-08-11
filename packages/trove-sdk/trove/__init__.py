@@ -47,6 +47,7 @@ from .exceptions import (
 
 # Parameters and search
 from .params import SearchParameters, build_limits
+from .search import Search, SearchFilter, SearchSpec, search
 # Rate limiting
 from .rate_limit import RateLimiter, TokenBucket
 # Resources
@@ -60,13 +61,91 @@ from .resources import (
 )
 from .transport import TroveTransport
 
+
+class TroveClient:
+    """High-level client providing both raw and ergonomic access to Trove API.
+    
+    Examples:
+        # Basic setup
+        client = TroveClient.from_env()
+        
+        # Ergonomic search
+        results = (client.search()
+                  .text("Australian literature")
+                  .in_("book")
+                  .decade("200")
+                  .first_page())
+                  
+        # Raw search for advanced use cases
+        raw_results = client.raw_search.page(
+            category=['book', 'image'],
+            q='Sydney',
+            l_decade=['200'],
+            facet=['format', 'availability']
+        )
+        
+        # Individual record access
+        work = client.resources.get_work_resource().get('123456')
+    """
+    
+    def __init__(self, config: TroveConfig):
+        self.config = config
+        self.cache = create_cache(config.cache_backend)
+        self.transport = TroveTransport(config, self.cache)
+        
+        # Raw access
+        self.raw_search = SearchResource(self.transport)
+        self.resources = ResourceFactory(self.transport)
+        
+    @classmethod
+    def from_env(cls) -> 'TroveClient':
+        """Create client from environment variables."""
+        config = TroveConfig.from_env()
+        return cls(config)
+        
+    @classmethod  
+    def from_api_key(cls, api_key: str, **kwargs) -> 'TroveClient':
+        """Create client from API key."""
+        config = TroveConfig(api_key=api_key, **kwargs)
+        return cls(config)
+        
+    def search(self) -> Search:
+        """Create a new ergonomic search builder."""
+        return Search(self.raw_search)
+        
+    def close(self):
+        """Close HTTP connections."""
+        self.transport.close()
+        
+    async def aclose(self):
+        """Close async HTTP connections."""
+        await self.transport.aclose()
+        
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        
+    async def __aenter__(self):
+        return self
+        
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.aclose()
+
+
 __all__ = [
     # Core
     "TroveConfig",
     "TroveTransport",
+    "TroveClient",
     # Parameters and Search
-    "SearchParameters",
+    "SearchParameters", 
     "build_limits",
+    "Search",
+    "SearchFilter",
+    "SearchSpec",
+    "search",
     # Resources
     "ResourceFactory",
     "SearchResource",

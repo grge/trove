@@ -156,13 +156,17 @@ class TestParameterValidation:
             
     def test_validation_page_size(self):
         """Test validation of page size limits."""
-        params = SearchParameters(category=['book'], n=0)
-        with pytest.raises(ValueError, match="Page size .* must be between 1 and 100"):
+        params = SearchParameters(category=['book'], n=-1)
+        with pytest.raises(ValueError, match="Page size .* must be between 0 and 100"):
             params.validate()
             
         params = SearchParameters(category=['book'], n=101)
-        with pytest.raises(ValueError, match="Page size .* must be between 1 and 100"):
+        with pytest.raises(ValueError, match="Page size .* must be between 0 and 100"):
             params.validate()
+            
+        # n=0 should be valid (for count operations)
+        params = SearchParameters(category=['book'], n=0)
+        params.validate()  # Should not raise
             
     def test_validation_article_type_values(self):
         """Test validation of article type values."""

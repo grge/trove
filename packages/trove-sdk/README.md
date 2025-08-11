@@ -4,8 +4,8 @@ A Python SDK for accessing Australia's National Library Trove API v3. Provides b
 
 ## Features
 
-- **Complete Search API** - Support for all 60+ Trove search parameters
-- **Parameter Utilities** - Convenient functions for parameter construction
+- **Ergonomic Search API** - Fluent, chainable interface for intuitive research workflows
+- **Complete Raw API Access** - Support for all 60+ Trove search parameters
 - **Smart Pagination** - Single and multi-category pagination support
 - **Enhanced Caching** - Intelligent TTL management and performance statistics
 - **Async & Sync Support** - Use with `asyncio` or traditional synchronous code
@@ -47,16 +47,41 @@ The SDK automatically loads `.env` files from your project directory or parent d
 ### Basic Usage
 
 ```python
+from trove import TroveClient
+
+# Simple search using the high-level client
+with TroveClient.from_env() as client:
+    # Ergonomic search interface
+    results = (client.search()
+              .text("Australian history")
+              .in_("book")
+              .online()  # Free online access
+              .australian_content()
+              .page_size(10)
+              .first_page())
+    
+    print(f"Found {results.total_results} books")
+    
+    # Access results
+    for category in results.categories:
+        works = category['records'].get('work', [])
+        for work in works[:5]:
+            print(f"- {work.get('title', 'Unknown Title')}")
+```
+
+### Advanced Usage (Raw API)
+
+```python
 from trove import TroveConfig, TroveTransport, SearchResource, create_cache
 
-# Configure the client
+# Configure the client for advanced usage
 config = TroveConfig.from_env()
 cache = create_cache("memory", enhanced=True)
 transport = TroveTransport(config, cache)
 search = SearchResource(transport)
 
 try:
-    # Search for books about Australian history
+    # Raw search with full parameter control
     result = search.page(
         category=['book'],
         q='Australian history',
@@ -78,23 +103,119 @@ finally:
 
 ```python
 import asyncio
-from trove import TroveConfig, TroveTransport, MemoryCache
+from trove import TroveClient
 
-async def search_trove():
-    config = TroveConfig.from_env()
-    cache = MemoryCache()
-    
-    async with TroveTransport(config, cache) as transport:
-        response = await transport.aget('/v3/result', {
-            'category': 'book',
-            'q': 'Australian history',
-            'n': 5
-        })
+async def async_search():
+    async with TroveClient.from_env() as client:
+        # Async ergonomic search
+        results = await (client.search()
+                        .text("Australian poetry")
+                        .in_("book")
+                        .decade("200")  # 2000s
+                        .page_size(10)
+                        .afirst_page())
         
-        return response
+        print(f"Found {results.total_results} books")
+        
+        # Async record iteration
+        async for record in client.search().text("poetry").in_("book").arecords():
+            print(f"- {record.get('title', 'Unknown Title')}")
+            break  # Just show first result
+        
+        return results
 
 # Run the async function
-results = asyncio.run(search_trove())
+results = asyncio.run(async_search())
+```
+
+## Ergonomic Search API
+
+The SDK provides a fluent, chainable search interface that makes common research workflows intuitive:
+
+### Method Chaining
+
+```python
+from trove import TroveClient
+
+client = TroveClient.from_env()
+
+# Build complex searches with method chaining
+results = (client.search()
+          .text("federation")
+          .in_("newspaper")
+          .decade("190")  # 1900s
+          .state("NSW", "VIC")  # Multiple states
+          .illustrated()  # Has illustrations
+          .sort_by("date_desc")
+          .with_facets("year", "title")
+          .page_size(50)
+          .first_page())
+```
+
+### Convenience Filters
+
+```python
+# Common filters have dedicated methods
+search = (client.search()
+         .text("women's suffrage")
+         .in_("newspaper")
+         .decade("190", "191")  # 1900s and 1910s
+         .online()  # Available online
+         .free_online()  # Free access
+         .australian_content()  # Australian content
+         .first_australians()  # First Nations content
+         .culturally_sensitive())  # Sensitive content
+```
+
+### Research Workflows
+
+```python
+# Systematic data collection with record iteration
+for record in (client.search()
+              .text("climate change")
+              .in_("newspaper")
+              .decade("200")  # 2000s
+              .records()):
+    title = record.get('heading', 'Unknown')
+    date = record.get('date', 'Unknown')
+    print(f"{date}: {title}")
+    
+    if collected_enough:
+        break  # Can break early
+```
+
+### Multi-Category vs Single-Category
+
+```python
+# Multi-category search (first_page only)
+results = (client.search()
+          .text("Sydney")
+          .in_("book", "image", "newspaper")
+          .first_page())  # Returns all categories
+
+# Single-category search (full pagination)
+for page in (client.search()
+            .text("poetry")
+            .in_("book")  # Single category only
+            .pages()):
+    process_page(page)
+```
+
+### Search Explanation
+
+```python
+# Debug your search queries
+search = (client.search()
+         .text("Aboriginal art")
+         .in_("image")
+         .decade("200")
+         .culturally_sensitive())
+
+explanation = search.explain()
+print(f"Categories: {explanation['categories']}")
+print(f"Query: {explanation['query']}")
+print(f"Filters applied: {len(explanation['filters'])}")
+print(f"Compiled params: {explanation['compiled_params']}")
 ```
 
 ## Configuration

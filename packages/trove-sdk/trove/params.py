@@ -219,8 +219,8 @@ class SearchParameters:
                 raise ValueError(f"Invalid availability values: {invalid_availability}")
         
         # Validate page size
-        if self.n < 1 or self.n > 100:
-            raise ValueError("Page size (n) must be between 1 and 100")
+        if self.n < 0 or self.n > 100:
+            raise ValueError("Page size (n) must be between 0 and 100")
             
         # Validate article type values
         if self.l_artType:
