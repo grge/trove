@@ -76,30 +76,30 @@ This project implements a lean, well-typed Python SDK for the Trove v3 API and a
 - [x] **Stage 2 Complete**: ✅ All search params work, pagination reliable, examples pass
 
 ### Stage 3 - Core Resources (Individual Record Access)
-- [ ] **Resource Endpoints**
-  - [ ] Work resource (`/v3/work/{id}`)
-  - [ ] Newspaper article resource (`/v3/newspaper/{id}`)
-  - [ ] Gazette article resource (`/v3/gazette/{id}`)
-  - [ ] People/organization resource (`/v3/people/{id}`)
-  - [ ] List resource (`/v3/list/{id}`)
-  - [ ] Title resources (newspaper, magazine, gazette)
-- [ ] **Parameter Support**
-  - [ ] Full support for `include` parameter
-  - [ ] Full support for `reclevel` parameter  
-  - [ ] Full support for `encoding` parameter
-- [ ] **Error Handling**
-  - [ ] Proper 404 handling for missing records
-  - [ ] 429 rate limit handling
-  - [ ] All documented error cases covered
-- [ ] **Testing**
-  - [ ] Contract tests for all endpoints
-  - [ ] Error scenario testing
-  - [ ] Parameter validation tests
-- [ ] **Documentation**
-  - [ ] Resource pages with examples for each endpoint
-  - [ ] Include/reclevel usage patterns
-  - [ ] Error handling examples
-- [ ] **Stage 3 Complete**: ✅ All core endpoints accessible, robust error handling
+- [x] **Resource Endpoints**
+  - [x] Work resource (`/v3/work/{id}`)
+  - [x] Newspaper article resource (`/v3/newspaper/{id}`)
+  - [x] Gazette article resource (`/v3/gazette/{id}`)
+  - [x] People/organization resource (`/v3/people/{id}`)
+  - [x] List resource (`/v3/list/{id}`)
+  - [x] Title resources (newspaper, magazine, gazette)
+- [x] **Parameter Support**
+  - [x] Full support for `include` parameter
+  - [x] Full support for `reclevel` parameter  
+  - [x] Full support for `encoding` parameter
+- [x] **Error Handling**
+  - [x] Proper 404 handling for missing records
+  - [x] 429 rate limit handling (inherited from transport)
+  - [x] All documented error cases covered
+- [x] **Testing**
+  - [x] Contract tests for all endpoints
+  - [x] Error scenario testing
+  - [x] Parameter validation tests
+- [x] **Documentation**
+  - [x] Resource pages with examples for each endpoint
+  - [x] Include/reclevel usage patterns
+  - [x] Error handling examples
+- [x] **Stage 3 Complete**: ✅ All core endpoints accessible, robust error handling
 
 ### Stage 4 - Ergonomic Search (Fluent Builder API)
 - [ ] **Builder Implementation**

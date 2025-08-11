@@ -50,7 +50,14 @@ from .params import SearchParameters, ParameterBuilder, build_limits
 # Rate limiting
 from .rate_limit import RateLimiter, TokenBucket
 # Resources
-from .resources import SearchResource, SearchResult, PaginationState
+from .resources import (
+    ResourceFactory,
+    SearchResource, SearchResult, PaginationState,
+    WorkResource, NewspaperResource, GazetteResource,
+    PeopleResource, ListResource,
+    NewspaperTitleResource, MagazineTitleResource, GazetteTitleResource,
+    BaseResource, RecLevel, Encoding
+)
 from .transport import TroveTransport
 
 __all__ = [
@@ -61,9 +68,22 @@ __all__ = [
     "SearchParameters",
     "ParameterBuilder", 
     "build_limits",
+    # Resources
+    "ResourceFactory",
     "SearchResource",
     "SearchResult",
     "PaginationState",
+    "WorkResource",
+    "NewspaperResource", 
+    "GazetteResource",
+    "PeopleResource",
+    "ListResource",
+    "NewspaperTitleResource",
+    "MagazineTitleResource",
+    "GazetteTitleResource",
+    "BaseResource",
+    "RecLevel",
+    "Encoding",
     # Exceptions
     "TroveError",
     "ConfigurationError",
