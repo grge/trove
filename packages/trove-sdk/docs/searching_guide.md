@@ -6,7 +6,7 @@ This guide covers all the search functionality implemented in Stage 2 of the Tro
 
 - [Quick Start](#quick-start)
 - [Search Parameters](#search-parameters)
-- [Parameter Builder](#parameter-builder)
+- [Parameter Construction](#parameter-construction-with-build_limits)
 - [Pagination](#pagination)
 - [Multi-Category Searches](#multi-category-searches)
 - [Caching and Performance](#caching-and-performance)
@@ -152,83 +152,93 @@ if 'facets' in result.categories[0]:
         print(f"{facet['name']}: {len(facet['term'])} values")
 ```
 
-## Parameter Builder
+## Parameter Construction with build_limits
 
-For complex searches, use the fluent parameter builder:
+For complex searches, use the `build_limits` utility function to construct limit parameters:
 
 ```python
-from trove import ParameterBuilder
+from trove import build_limits, SearchParameters
 
-# Fluent interface
-params = (ParameterBuilder()
-         .categories('book')
-         .query('Australian poetry')
-         .decade('200')                    # 2000s
-         .australian_content()             # Australian content only
-         .availability('y/f')              # Free online
-         .page_size(50)
-         .record_level('full')
-         .facets('decade', 'format')
-         .include_fields('tags', 'workversions')
-         .build())
+# Build API-ready limit parameters
+limits = build_limits(
+    decade=['200'],                      # 2000s
+    australian='y',                      # Australian content only
+    availability=['y/f'],                # Free online
+    format=['Book'],                     # Books only
+    language=['English']                 # English language
+)
+
+# Use with raw API calls
+result = search.page(
+    category=['book'],
+    q='Australian poetry',
+    n=50,
+    reclevel='full',
+    facet=['decade', 'format'],
+    include=['tags', 'workversions'],
+    **limits  # Spreads API parameters like l-decade, l-australian, etc.
+)
+
+# Or create SearchParameters object directly
+params = SearchParameters(
+    category=['book'],
+    q='Australian poetry',
+    n=50,                               # Page size
+    reclevel='full',                    # Full records
+    facet=['decade', 'format'],         # Facets
+    include=['tags', 'workversions'],   # Optional fields
+    l_decade=['200'],                   # Direct assignment
+    l_australian='y',
+    l_availability=['y/f'],
+    l_format=['Book'],
+    l_language=['English']
+)
 
 result = search.page(params=params)
 ```
 
-### Builder Methods
+### Direct SearchParameters Construction
 
-The parameter builder provides intuitive methods for all parameters:
+You can also construct SearchParameters directly for maximum control:
 
 ```python
-# Basic parameters
-builder = (ParameterBuilder()
-          .categories('book', 'image')     # Multiple categories
-          .query('Sydney Harbour')         # Search query
-          .page_size(25)                   # Results per page
-          .sort('datedesc')                # Sort order
-          .bulk_harvest()                  # Enable bulk mode
-          .record_level('full'))           # Full metadata
+from trove import SearchParameters
 
-# Date filters
-builder = (builder
-          .decade('190', '200')            # Multiple decades
-          .year('1901')                    # Specific year
-          .month('01'))                    # Specific month
+# Direct construction
+params = SearchParameters(
+    category=['book', 'image'],          # Multiple categories
+    q='Sydney Harbour',                  # Search query
+    n=25,                               # Results per page
+    sortby='datedesc',                  # Sort order
+    bulkHarvest=True,                   # Enable bulk mode
+    reclevel='full',                    # Full metadata
+    
+    # Date filters
+    l_decade=['190', '200'],            # Multiple decades
+    l_year=['1901'],                    # Specific year
+    l_month=['01'],                     # Specific month
+    
+    # Geographic filters
+    l_state=['NSW', 'VIC'],             # Multiple states
+    l_place=['Sydney', 'Melbourne'],    # Cities
+    l_geographic=['Australia'],         # Coverage
+    
+    # Content filters
+    l_format=['Book', 'Map'],           # Multiple formats
+    l_artType=['newspaper'],            # Article type
+    l_language=['English', 'French'],   # Languages
+    l_availability=['y', 'y/f'],        # Online + free
+    l_australian='y',                   # Australian flag
+    l_illustrated=True,                 # Illustrated only
+    l_wordCount=['1000+ Words'],        # Long articles
+    
+    # Advanced parameters
+    facet=['decade', 'format', 'language'],
+    include=['tags', 'comments', 'holdings']
+)
 
-# Geographic filters
-builder = (builder
-          .state('NSW', 'VIC')             # Multiple states
-          .geographic_coverage('Australia')
-          .place('Sydney'))                # People birth place
-
-# Content filters  
-builder = (builder
-          .format('Book', 'Map')           # Multiple formats
-          .article_type('newspaper')       # Article types
-          .language('English')             # Content language
-          .illustrated(True)               # Illustrated content
-          .word_count('1000+ Words'))      # Article length
-
-# Boolean flags
-builder = (builder
-          .first_australians()             # First Australians content
-          .cultural_sensitivity()          # Culturally sensitive
-          .australian_content())           # Australian content
-
-# People-specific
-builder = (builder
-          .occupation('Author')            # Person occupation
-          .birth_year('1850')              # Birth year
-          .death_year('1920'))             # Death year
-
-# Faceting and includes
-builder = (builder
-          .facets('decade', 'format', 'language')
-          .include_fields('tags', 'comments', 'holdings'))
-
-params = builder.build()  # Validates and builds parameters
+result = search.page(params=params)
 ```
-
 ## Pagination
 
 The SDK provides powerful pagination support with different strategies for different use cases.
@@ -720,17 +730,19 @@ def research_workflow():
     
     # 2. Focused search based on facets
     print("\n2. Focused search for poetry books...")
-    poetry_params = (ParameterBuilder()
-                    .categories('book')
-                    .query('Australian poetry')
-                    .decade('200')
-                    .format('Book')
-                    .australian_content()
-                    .availability('y/f')  # Free online
-                    .page_size(50)
-                    .record_level('full')
-                    .include_fields('tags', 'workversions')
-                    .build())
+    
+    # Use direct SearchParameters construction
+    poetry_params = SearchParameters(
+        category=['book'],
+        q='Australian poetry',
+        n=50,                           # Page size
+        reclevel='full',                # Full records
+        include=['tags', 'workversions'], # Optional fields
+        l_decade=['200'],               # Direct assignment
+        l_format=['Book'],
+        l_australian='y',
+        l_availability=['y/f']          # Free online
+    )
     
     # 3. Systematic collection
     poetry_works = []

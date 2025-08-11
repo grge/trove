@@ -7,7 +7,7 @@ from trove.config import TroveConfig
 from trove.transport import TroveTransport
 from trove.cache import create_cache
 from trove.resources.search import SearchResource
-from trove.params import SearchParameters, ParameterBuilder
+from trove.params import SearchParameters
 from trove.exceptions import ValidationError
 
 
@@ -130,20 +130,6 @@ class TestSearchIntegration:
         
         assert result.total_results >= 0
         assert result.query == 'poetry'
-        
-    def test_parameter_builder_integration(self, search_resource):
-        """Test parameter builder with real API."""
-        params = (search_resource.build_params()
-                 .categories('book')
-                 .query('Melbourne')
-                 .decade('200')
-                 .page_size(15)
-                 .facets('format', 'language')
-                 .australian_content()
-                 .build())
-                 
-        result = search_resource.page(params=params)
-        assert result.total_results >= 0
         
     def test_bulk_harvest_mode(self, search_resource):
         """Test bulk harvest functionality."""

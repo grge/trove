@@ -20,6 +20,10 @@ This project implements a lean, well-typed Python SDK for the Trove v3 API and a
 - **[STAGE_6_MODELS_POLISH_DESIGN.md](./STAGE_6_MODELS_POLISH_DESIGN.md)** - Optional Pydantic models and production polish
 - **[STAGE_7_MCP_SERVER_DESIGN.md](./STAGE_7_MCP_SERVER_DESIGN.md)** - MCP server implementation
 
+## Implementation Deviations
+
+**ParameterBuilder Removal**: The `ParameterBuilder` class originally specified in Stage 2 has been removed from the implementation to avoid conflicting fluent interfaces with Stage 4's comprehensive ergonomic search API. The `SearchParameters` dataclass and `build_limits` utility provide sufficient parameter construction capabilities. See [STAGE_2_COMPLETE_SEARCH_DESIGN.md](./STAGE_2_COMPLETE_SEARCH_DESIGN.md) for full details.
+
 ## Master Implementation Checklist
 
 ### Stage 1 - Foundation (Transport, Config, Errors)

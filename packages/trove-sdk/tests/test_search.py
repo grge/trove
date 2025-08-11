@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from trove.resources.search import SearchResource, SearchResult, PaginationState
-from trove.params import SearchParameters, ParameterBuilder
+from trove.params import SearchParameters
 from trove.exceptions import ValidationError, TroveAPIError
 
 

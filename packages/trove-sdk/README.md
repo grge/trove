@@ -5,7 +5,7 @@ A Python SDK for accessing Australia's National Library Trove API v3. Provides b
 ## Features
 
 - **Complete Search API** - Support for all 60+ Trove search parameters
-- **Fluent Parameter Builder** - Intuitive, type-safe parameter construction
+- **Parameter Utilities** - Convenient functions for parameter construction
 - **Smart Pagination** - Single and multi-category pagination support
 - **Enhanced Caching** - Intelligent TTL management and performance statistics
 - **Async & Sync Support** - Use with `asyncio` or traditional synchronous code
@@ -132,10 +132,10 @@ config = TroveConfig(
 The SDK supports all 60+ Trove search parameters with full validation:
 
 ```python
-from trove import SearchResource, ParameterBuilder
+from trove import SearchResource, SearchParameters
 
-# Complex search with multiple filters
-result = search.page(
+# Complex search with multiple filters using SearchParameters
+params = SearchParameters(
     category=['book'],
     q='Australian literature',
     l_decade=['200'],              # 2000s publications
@@ -148,6 +148,8 @@ result = search.page(
     n=50                           # 50 results per page
 )
 
+result = search.page(params=params)
+
 print(f"Found {result.total_results} books")
 
 # Check facets for refinement
@@ -156,21 +158,43 @@ for facet in facets:
     print(f"{facet['name']}: {len(facet['term'])} options")
 ```
 
-### Fluent Parameter Builder
+### Parameter Construction with build_limits Utility
 
-Use the parameter builder for readable, type-safe searches:
+Use the `build_limits` utility function for API-ready parameter construction:
 
 ```python
-params = (ParameterBuilder()
-         .categories('newspaper')
-         .query('federation')
-         .decade('190')                    # 1900s
-         .state('NSW', 'VIC')             # Multiple states  
-         .illustrated(True)               # Only illustrated articles
-         .word_count('1000+ Words')       # Long articles only
-         .sort('datedesc')                # Newest first
-         .page_size(25)
-         .build())
+from trove import build_limits
+
+# Build API-ready limit parameters
+limits = build_limits(
+    decade=['190'],                      # 1900s
+    state=['NSW', 'VIC'],               # Multiple states  
+    illustrated=True,                   # Only illustrated articles
+    wordCount=['1000+ Words'],          # Long articles only
+    australian='y'                      # Australian content
+)
+
+# Use directly in raw API calls
+result = search.page(
+    category=['newspaper'],
+    q='federation',
+    sortby='datedesc',
+    n=25,
+    **limits  # Spreads API-ready parameters like l-decade, l-state, etc.
+)
+
+# Or construct SearchParameters directly with typed attributes
+params = SearchParameters(
+    category=['newspaper'],
+    q='federation',
+    sortby='datedesc',
+    n=25,
+    l_decade=['190'],                    # Direct attribute assignment
+    l_state=['NSW', 'VIC'],
+    l_illustrated=True,
+    l_wordCount=['1000+ Words'],
+    l_australian='y'
+)
 
 result = search.page(params=params)
 ```

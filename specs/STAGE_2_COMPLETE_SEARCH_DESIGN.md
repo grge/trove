@@ -4,6 +4,22 @@
 
 Stage 2 implements comprehensive search functionality with complete parameter support, cursor-based pagination, and robust multi-category handling. This stage provides the raw, powerful search interface that later stages will build upon.
 
+## ⚠️ Implementation Deviation Note
+
+**IMPORTANT**: The ParameterBuilder class originally specified in this design document has been **removed** from the implementation. This decision was made to avoid conflicting fluent interfaces when implementing Stage 4's comprehensive ergonomic search API.
+
+**What was removed:**
+- `ParameterBuilder` class with fluent method chaining (`.categories()`, `.query()`, etc.)
+- `SearchResource.build_params()` method that returned a ParameterBuilder instance
+
+**What remains:**
+- `SearchParameters` dataclass as the core parameter model
+- `build_limits()` utility function for constructing limit parameters
+- All search functionality and parameter validation
+- Complete Stage 2 functionality as designed
+
+**Rationale**: Stage 4's immutable `Search` builder provides a more complete and research-friendly fluent interface that combines parameter building with execution methods (`.first_page()`, `.records()`, etc.). Keeping both would create user confusion and duplicate functionality. The `SearchParameters` model and `build_limits` utility provide sufficient parameter construction capabilities for direct API usage.
+
 ## API Analysis Summary
 
 Based on the comprehensive API documentation review:
@@ -20,7 +36,7 @@ Based on the comprehensive API documentation review:
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        Search Interface                             │
 ├─────────────────────────────────────────────────────────────────────┤
-│  SearchResource  │  ParameterBuilder  │  Iterators  │  Validators   │
+│  SearchResource  │  SearchParameters  │  Iterators  │  Validators   │
 ├──────────────────┴────────────────────┴─────────────┴───────────────┤
 │                       Transport Layer (Stage 1)                     │
 └─────────────────────────────────────────────────────────────────────┘

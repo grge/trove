@@ -5,7 +5,7 @@ This example showcases all the advanced search features implemented in Stage 2:
 - Complete parameter support (60+ parameters)
 - Single and multi-category pagination
 - Enhanced caching with statistics
-- Parameter builders and validation
+- Parameter construction utilities and validation
 - Async operations
 
 Before running:
@@ -20,7 +20,7 @@ import os
 from pathlib import Path
 from trove import (
     TroveConfig, TroveTransport, SearchResource, SearchParameters, 
-    ParameterBuilder, create_cache
+    build_limits, create_cache
 )
 
 
@@ -126,43 +126,49 @@ def demonstrate_advanced_parameters():
     transport.close()
 
 
-def demonstrate_parameter_builder():
-    """Demonstrate fluent parameter builder."""
-    print("\n=== Parameter Builder Examples ===")
+def demonstrate_parameter_construction():
+    """Demonstrate parameter construction utilities."""
+    print("\n=== Parameter Construction Examples ===")
     
     config = TroveConfig.from_env()
     cache = create_cache("memory")
     transport = TroveTransport(config, cache)
     search = SearchResource(transport)
     
-    # Using parameter builder for clean, readable code
-    print("\n1. Fluent parameter building:")
-    params = (search.build_params()
-             .categories('book')
-             .query('Australian poetry')
-             .decade('200')
-             .australian_content()
-             .page_size(20)
-             .record_level('full')
-             .facets('decade', 'format', 'language')
-             .include_fields('tags', 'comments', 'workversions')
-             .build())
+    # Using build_limits utility for API calls
+    print("\n1. Using build_limits utility with raw API:")
+    limits = build_limits(
+        decade=['200'],
+        australian='y',
+        format=['Book'],
+        language=['English']
+    )
     
-    result = search.page(params=params)
-    print(f"Parameter builder search found {result.total_results} poetry books")
+    # Use directly with search.page() API call
+    result = search.page(
+        category=['book'],
+        q='Australian poetry',
+        n=20,
+        reclevel='full',
+        facet=['decade', 'format', 'language'],
+        include=['tags', 'comments', 'workversions'],
+        **limits  # Spreads API parameters like l-decade, l-australian, etc.
+    )
     
-    # Complex newspaper search with builder
-    print("\n2. Complex newspaper search with builder:")
-    params = (ParameterBuilder()
-             .categories('newspaper')
-             .query('gold rush')
-             .decade('185', '186')  # 1850s-1860s
-             .state('VIC', 'NSW')
-             .illustrated(True)
-             .word_count('1000+ Words')  # Long articles only
-             .sort('datedesc')  # Newest first
-             .page_size(10)
-             .build())
+    print(f"build_limits search found {result.total_results} poetry books")
+    
+    # Complex newspaper search with direct construction
+    print("\n2. Direct SearchParameters construction:")
+    params = SearchParameters(
+        category=['newspaper'],
+        q='gold rush',
+        l_decade=['185', '186'],  # 1850s-1860s
+        l_state=['VIC', 'NSW'],
+        l_illustrated=True,
+        l_wordCount=['1000+ Words'],  # Long articles only
+        sortby='datedesc',  # Newest first
+        n=10
+    )
     
     result = search.page(params=params)
     print(f"Found {result.total_results} long illustrated gold rush articles")
@@ -453,7 +459,7 @@ def main():
         # Run sync examples
         demonstrate_basic_search()
         demonstrate_advanced_parameters()
-        demonstrate_parameter_builder()
+        demonstrate_parameter_construction()
         demonstrate_pagination()
         demonstrate_enhanced_caching()
         demonstrate_error_handling()

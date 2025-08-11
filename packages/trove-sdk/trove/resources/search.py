@@ -6,7 +6,7 @@ import logging
 import warnings
 
 from ..transport import TroveTransport
-from ..params import SearchParameters, ParameterBuilder
+from ..params import SearchParameters
 from ..exceptions import TroveAPIError, ValidationError
 
 logger = logging.getLogger(__name__)
@@ -340,9 +340,6 @@ class SearchResource:
                 for page_result in self.iter_pages(params=single_category_params):
                     yield category_code, page_result
                     
-    def build_params(self) -> ParameterBuilder:
-        """Create a parameter builder for fluent parameter construction."""
-        return ParameterBuilder()
         
     def _kwargs_to_params(self, kwargs: Dict[str, Any]) -> SearchParameters:
         """Convert keyword arguments to SearchParameters object."""

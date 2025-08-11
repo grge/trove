@@ -46,7 +46,7 @@ from .exceptions import (
 )
 
 # Parameters and search
-from .params import SearchParameters, ParameterBuilder, build_limits
+from .params import SearchParameters, build_limits
 # Rate limiting
 from .rate_limit import RateLimiter, TokenBucket
 # Resources
@@ -66,7 +66,6 @@ __all__ = [
     "TroveTransport",
     # Parameters and Search
     "SearchParameters",
-    "ParameterBuilder", 
     "build_limits",
     # Resources
     "ResourceFactory",
