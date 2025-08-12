@@ -59,6 +59,13 @@ from .resources import (
     NewspaperTitleResource, MagazineTitleResource, GazetteTitleResource,
     BaseResource, RecLevel, Encoding
 )
+
+# Citations
+from .citations import (
+    CitationManager, CitationRef, RecordType,
+    PIDExtractor, PIDResolver, CitationFormatter,
+    BibTeXFormatter, CSLJSONFormatter
+)
 from .transport import TroveTransport
 
 
@@ -96,6 +103,9 @@ class TroveClient:
         # Raw access
         self.raw_search = SearchResource(self.transport)
         self.resources = ResourceFactory(self.transport)
+        
+        # Citations
+        self.citations = CitationManager(self.resources)
         
     @classmethod
     def from_env(cls) -> 'TroveClient':
@@ -162,6 +172,15 @@ __all__ = [
     "BaseResource",
     "RecLevel",
     "Encoding",
+    # Citations
+    "CitationManager",
+    "CitationRef",
+    "RecordType", 
+    "PIDExtractor",
+    "PIDResolver",
+    "CitationFormatter",
+    "BibTeXFormatter",
+    "CSLJSONFormatter",
     # Exceptions
     "TroveError",
     "ConfigurationError",

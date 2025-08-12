@@ -106,58 +106,58 @@ This project implements a lean, well-typed Python SDK for the Trove v3 API and a
 - [x] **Stage 3 Complete**: ✅ All core endpoints accessible, robust error handling
 
 ### Stage 4 - Ergonomic Search (Fluent Builder API)
-- [ ] **Builder Implementation**
-  - [ ] Immutable `Search` builder class
-  - [ ] `.text()` method for query text
-  - [ ] `.in_()` method for categories
-  - [ ] `.page_size()` method for pagination
-  - [ ] `.sort()` method for result ordering
-  - [ ] `.with_reclevel()` method for record detail
-  - [ ] `.with_facets()` method for facet inclusion
-  - [ ] `.where()` method for additional filters
-  - [ ] `.harvest()` method for bulk operations
-- [ ] **Result Methods**
-  - [ ] `.first_page()` for single page results
-  - [ ] `.pages()` iterator for all pages
-  - [ ] `.records()` iterator for all records
-- [ ] **Multi-category Handling**
-  - [ ] Clear error messages for unsupported operations
-  - [ ] Documentation of limitations
-  - [ ] Per-category helper methods
-- [ ] **Testing**
-  - [ ] Builder methods compile correctly to raw parameters
-  - [ ] Single-category flows work seamlessly
-  - [ ] Parity testing with raw API
-- [ ] **Documentation**
-  - [ ] Ergonomic vs raw API comparison
-  - [ ] Three runnable examples demonstrating benefits
-  - [ ] Multi-category limitation explanations
-- [ ] **Stage 4 Complete**: ✅ Fluent API works, examples demonstrate value
+- [x] **Builder Implementation**
+  - [x] Immutable `Search` builder class
+  - [x] `.text()` method for query text
+  - [x] `.in_()` method for categories
+  - [x] `.page_size()` method for pagination
+  - [x] `.sort_by()` method for result ordering
+  - [x] `.with_reclevel()` method for record detail
+  - [x] `.with_facets()` method for facet inclusion
+  - [x] `.where()` method for additional filters
+  - [x] `.harvest()` method for bulk operations
+- [x] **Result Methods**
+  - [x] `.first_page()` for single page results
+  - [x] `.pages()` iterator for all pages
+  - [x] `.records()` iterator for all records
+- [x] **Multi-category Handling**
+  - [x] Clear error messages for unsupported operations
+  - [x] Documentation of limitations
+  - [x] Per-category helper methods via convenience filters
+- [x] **Testing**
+  - [x] Builder methods compile correctly to raw parameters
+  - [x] Single-category flows work seamlessly
+  - [x] Parity testing with raw API
+- [x] **Documentation**
+  - [x] Ergonomic vs raw API comparison
+  - [x] Three runnable examples demonstrating benefits
+  - [x] Multi-category limitation explanations
+- [x] **Stage 4 Complete**: ✅ Fluent API works, examples demonstrate value
 
 ### Stage 5 - Citations (PID Management & Export)
-- [ ] **PID Extraction**
-  - [ ] PID extractors for all record types (Work, Article, People, List, Title)
-  - [ ] URL pattern recognition for Trove URLs
-  - [ ] Canonical PID format validation
-- [ ] **Resolution System**
-  - [ ] PID to record resolution
-  - [ ] URL to record resolution  
-  - [ ] Search-based fallback for ambiguous cases
-  - [ ] Handle malformed PIDs gracefully
-- [ ] **Citation Formatters**
-  - [ ] BibTeX citation formatter
-  - [ ] CSL-JSON citation formatter
-  - [ ] Validate output formats
-- [ ] **Testing**
-  - [ ] Round-trip tests (record → PID → record)
-  - [ ] Citation formatter validation
-  - [ ] Edge case handling
-  - [ ] Real data testing
-- [ ] **Documentation**
-  - [ ] Citing Trove guide with canonical PID examples
-  - [ ] Citation format examples
-  - [ ] PID resolution patterns
-- [ ] **Stage 5 Complete**: ✅ Citation system works end-to-end with real data
+- [x] **PID Extraction**
+  - [x] PID extractors for all record types (Work, Article, People, List, Title)
+  - [x] URL pattern recognition for Trove URLs
+  - [x] Canonical PID format validation
+- [x] **Resolution System**
+  - [x] PID to record resolution
+  - [x] URL to record resolution  
+  - [x] Search-based fallback for ambiguous cases
+  - [x] Handle malformed PIDs gracefully
+- [x] **Citation Formatters**
+  - [x] BibTeX citation formatter
+  - [x] CSL-JSON citation formatter
+  - [x] Validate output formats
+- [x] **Testing**
+  - [x] Round-trip tests (record → PID → record)
+  - [x] Citation formatter validation
+  - [x] Edge case handling
+  - [x] Real data testing
+- [x] **Documentation**
+  - [x] Citing Trove guide with canonical PID examples
+  - [x] Citation format examples
+  - [x] PID resolution patterns
+- [x] **Stage 5 Complete**: ✅ Citation system works end-to-end with real data
 
 ### Stage 6 - Models & Polish (Production Ready)
 - [ ] **Optional Models**
