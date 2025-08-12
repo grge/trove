@@ -1,1 +1,0 @@
-"""MCP tools for Trove API access."""

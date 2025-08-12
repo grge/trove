@@ -2,6 +2,6 @@
 
 __version__ = "1.0.0"
 
-from .server import TroveMCPServer
+from .server import mcp, main
 
-__all__ = ["TroveMCPServer"]
+__all__ = ["mcp", "main"]

@@ -1,19 +1,16 @@
 # Trove API Documentation
 
-This project contains fragmented documentation for the Trove API v3, designed for optimal AI agent consumption.
+This project contains a python library for the Trove API v3, which provides access to Australia's National Library digital collection. It also contains an MCP server implementation that is currently under development.
 
-## Key Resources
+Key folders:
+- trove-sdk: The main SDK library for accessing the Trove API.
+- trove-mcp: The MCP server implementation for the Trove API.
+- api_docs: LLM friendly description of the Trove API endpoints, and raw OpenAPI spec.
+- trove-sdk/docs/api: Documentation for the SDK, including usage examples and API reference.
 
-- **[api_docs/trove-api-index.md](./api_docs/trove-api-index.md)** - Complete documentation index
-- **[api_docs/trove-api-v3.yaml](./api_docs/trove-api-v3.yaml)** - Original OpenAPI specification  
-- **[api_docs/trove-search-parameters.md](./api_docs/trove-search-parameters.md)** - Search guide
-- **[api_docs/trove-api-authentication.md](./api_docs/trove-api-authentication.md)** - API key setup
+## MCP REWRITE PROJECT
 
-See [api_docs/CLAUDE.md](./api_docs/CLAUDE.md) for detailed AI agent guidance.
-
-## Implementation Progress
-
-We are currently implementing the library in stages, as outlined in specs/CLAUDE.md
+We are currently trying to write a good MCP server
 
 ## Development Setup
 

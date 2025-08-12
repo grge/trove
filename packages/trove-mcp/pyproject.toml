@@ -24,6 +24,7 @@ requires-python = ">=3.10"
 dependencies = [
     "mcp>=0.5.0",
     "pydantic>=2.0.0",
+    "trove-sdk @ file:///home/george/code/trove2/packages/trove-sdk",
 ]
 
 [project.optional-dependencies]
@@ -41,6 +42,9 @@ trove-mcp = "trove_mcp.server:main"
 [tool.hatch.build.targets.wheel]
 packages = ["trove_mcp"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.black]
 line-length = 100
 target-version = ["py310"]
@@ -55,3 +59,9 @@ warn_unused_configs = true
 line-length = 100
 target-version = "py310"
 select = ["E", "F", "UP", "B", "SIM", "I"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+]
