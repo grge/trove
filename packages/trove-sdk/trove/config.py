@@ -74,6 +74,9 @@ class TroveConfig:
     log_level: str = "INFO"
     log_requests: bool = False
     redact_credentials: bool = True
+    
+    # Models (Stage 6)
+    use_models: bool = False  # Default to False for backward compatibility
 
     @classmethod
     def from_env(cls, dotenv_path: str | Path | None = None) -> 'TroveConfig':
@@ -204,6 +207,7 @@ class TroveConfig:
             ('TROVE_BACKOFF_JITTER', 'backoff_jitter'),
             ('TROVE_LOG_REQUESTS', 'log_requests'),
             ('TROVE_REDACT_CREDENTIALS', 'redact_credentials'),
+            ('TROVE_USE_MODELS', 'use_models'),
         ]:
             value = parse_bool(os.environ.get(env_var))
             if value is not None:

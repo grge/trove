@@ -20,6 +20,9 @@ from .exceptions import (
     map_http_exception,
 )
 from .rate_limit import ExponentialBackoff, RateLimiter
+from .errors import get_error_handler
+from .performance import get_performance_monitor, ConnectionPool, RequestOptimizer
+from .logging import transport_logger
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +73,13 @@ class TroveTransport:
             jitter=config.backoff_jitter
         )
 
+        # Enhanced connection pooling
+        connection_pool = ConnectionPool(
+            pool_connections=config.max_concurrency,
+            pool_maxsize=config.max_concurrency
+        )
+        pool_limits = connection_pool.configure_httpx_limits()
+        
         # Configure httpx client
         self._client = httpx.Client(
             timeout=httpx.Timeout(
@@ -78,7 +88,7 @@ class TroveTransport:
                 write=config.read_timeout,
                 pool=config.read_timeout
             ),
-            limits=httpx.Limits(max_connections=config.max_concurrency)
+            limits=httpx.Limits(**pool_limits)
         )
 
         # Async client for async operations
@@ -89,8 +99,11 @@ class TroveTransport:
                 write=config.read_timeout,
                 pool=config.read_timeout
             ),
-            limits=httpx.Limits(max_connections=config.max_concurrency)
+            limits=httpx.Limits(**pool_limits)
         )
+        
+        # Performance monitoring
+        self.monitor = get_performance_monitor()
 
     def _build_url(self, endpoint: str) -> str:
         """Build full URL for API endpoint.
@@ -262,31 +275,52 @@ class TroveTransport:
         url = self._build_url(endpoint)
         headers = self._build_headers()
 
+        # Optimize parameters for performance
+        params = RequestOptimizer.optimize_search_params(params)
+        
         # Check cache first
         cache_key = self._build_cache_key('GET', url, params)
         cached_response = self.cache.get(cache_key)
         if cached_response is not None:
             logger.debug(f"Cache hit for {cache_key}")
+            self.monitor.record_cache_hit()
             return cached_response
+        
+        self.monitor.record_cache_miss()
 
         # Retry loop with exponential backoff
         last_exception = None
+        request_id = f"{endpoint}_{id(params)}"
+        
         for attempt in range(self.config.max_retries + 1):
             try:
                 # Rate limit the request
                 if not self.rate_limiter.acquire(timeout=30.0):
+                    self.monitor.record_rate_limit_delay()
                     raise RateLimitError("Timeout waiting for rate limit permission")
 
                 try:
                     if self.config.log_requests:
                         safe_params = self._redact_credentials(params) if self.config.redact_credentials else params
-                        logger.info(f"GET {url} params={safe_params}")
+                        transport_logger.info(
+                            f"HTTP GET request",
+                            endpoint=endpoint,
+                            url=url,
+                            params=safe_params,
+                            attempt=attempt + 1,
+                            request_id=request_id
+                        )
 
+                    # Start timing the request
+                    self.monitor.start_request(request_id)
                     response = self._client.get(url, params=params, headers=headers)
                     response.raise_for_status()
 
                     # Parse response based on content type
                     response_data = self._parse_response(response)
+
+                    # End timing and record successful request
+                    self.monitor.end_request(request_id)
 
                     # Cache successful responses
                     ttl = self._determine_ttl(endpoint, response_data)
@@ -301,25 +335,53 @@ class TroveTransport:
                 try:
                     self._handle_http_error(e)
                 except Exception as parsed_error:
-                    last_exception = parsed_error
+                    # Enhance error with context
+                    context = {
+                        'endpoint': endpoint,
+                        'params': params,
+                        'operation': 'HTTP GET request',
+                        'attempt': attempt + 1,
+                        'max_retries': self.config.max_retries
+                    }
+                    
+                    enhanced_error = get_error_handler().wrap_api_error(parsed_error, context)
+                    last_exception = enhanced_error
+                    
+                    # Record error for monitoring
+                    self.monitor.record_error()
 
                     # Don't retry non-retryable errors
-                    if not is_retryable_error(parsed_error):
-                        raise
+                    if not is_retryable_error(enhanced_error):
+                        raise enhanced_error
 
                     # Don't retry on last attempt
                     if attempt == self.config.max_retries:
-                        raise
+                        raise enhanced_error
 
                     # Sleep before retry
                     self.backoff.sleep(attempt)
 
             except httpx.RequestError as e:
-                last_exception = NetworkError(f"Network error: {e}")
+                network_error = NetworkError(f"Network error: {e}")
+                
+                # Enhance error with context
+                context = {
+                    'endpoint': endpoint,
+                    'params': params,
+                    'operation': 'HTTP GET request',
+                    'attempt': attempt + 1,
+                    'max_retries': self.config.max_retries
+                }
+                
+                enhanced_error = get_error_handler().wrap_api_error(network_error, context)
+                last_exception = enhanced_error
+                
+                # Record error for monitoring
+                self.monitor.record_error()
 
                 # Don't retry on last attempt
                 if attempt == self.config.max_retries:
-                    raise last_exception
+                    raise enhanced_error
 
                 # Sleep before retry
                 self.backoff.sleep(attempt)
@@ -393,25 +455,47 @@ class TroveTransport:
                 try:
                     self._handle_http_error(e)
                 except Exception as parsed_error:
-                    last_exception = parsed_error
+                    # Enhance error with context
+                    context = {
+                        'endpoint': endpoint,
+                        'params': params,
+                        'operation': 'Async HTTP GET request',
+                        'attempt': attempt + 1,
+                        'max_retries': self.config.max_retries
+                    }
+                    
+                    enhanced_error = get_error_handler().wrap_api_error(parsed_error, context)
+                    last_exception = enhanced_error
 
                     # Don't retry non-retryable errors
-                    if not is_retryable_error(parsed_error):
-                        raise
+                    if not is_retryable_error(enhanced_error):
+                        raise enhanced_error
 
                     # Don't retry on last attempt
                     if attempt == self.config.max_retries:
-                        raise
+                        raise enhanced_error
 
                     # Sleep before retry
                     await self.backoff.async_sleep(attempt)
 
             except httpx.RequestError as e:
-                last_exception = NetworkError(f"Network error: {e}")
+                network_error = NetworkError(f"Network error: {e}")
+                
+                # Enhance error with context
+                context = {
+                    'endpoint': endpoint,
+                    'params': params,
+                    'operation': 'Async HTTP GET request',
+                    'attempt': attempt + 1,
+                    'max_retries': self.config.max_retries
+                }
+                
+                enhanced_error = get_error_handler().wrap_api_error(network_error, context)
+                last_exception = enhanced_error
 
                 # Don't retry on last attempt
                 if attempt == self.config.max_retries:
-                    raise last_exception
+                    raise enhanced_error
 
                 # Sleep before retry
                 await self.backoff.async_sleep(attempt)

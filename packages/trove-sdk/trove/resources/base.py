@@ -89,7 +89,10 @@ class BaseResource(ABC):
             response = self.transport.get(endpoint, params)
             
             # Post-process response if needed
-            return self._post_process_response(response, resource_id)
+            processed_response = self._post_process_response(response, resource_id)
+            
+            # Try to parse into Pydantic model if available
+            return self._try_parse_model(processed_response)
             
         except TroveAPIError as e:
             if e.status_code == 404:
@@ -135,7 +138,10 @@ class BaseResource(ABC):
             logger.info(f"Async fetching {self.__class__.__name__} {resource_id} with reclevel={reclevel.value}")
             
             response = await self.transport.aget(endpoint, params)
-            return self._post_process_response(response, resource_id)
+            processed_response = self._post_process_response(response, resource_id)
+            
+            # Try to parse into Pydantic model if available
+            return self._try_parse_model(processed_response)
             
         except TroveAPIError as e:
             if e.status_code == 404:
@@ -216,3 +222,50 @@ class BaseResource(ABC):
             Post-processed response data
         """
         return response
+    
+    def _try_parse_model(self, data: Dict[str, Any]) -> Union[Dict[str, Any], Any]:
+        """Try to parse data into a Pydantic model if enabled and available.
+        
+        Args:
+            data: Raw data to parse
+            
+        Returns:
+            Parsed model instance or original data if parsing fails or disabled
+        """
+        # Check if models are enabled in config
+        if not self.transport.config.use_models:
+            return data
+            
+        # Import here to avoid circular imports
+        try:
+            from ..models import parse_record
+            
+            # Determine record type from endpoint path
+            record_type = self._get_record_type()
+            if record_type:
+                parsed = parse_record(data, record_type)
+                if parsed:
+                    return parsed
+        except ImportError:
+            # Models not available, return raw data
+            pass
+        except Exception as e:
+            logger.debug(f"Failed to parse model for {self.__class__.__name__}: {e}")
+        
+        return data
+    
+    def _get_record_type(self) -> Optional[str]:
+        """Get the record type for model parsing. Override in subclasses.
+        
+        Returns:
+            Record type string or None if not applicable
+        """
+        # Map endpoint paths to record types
+        path_to_type = {
+            '/work': 'work',
+            '/newspaper': 'article',
+            '/gazette': 'article', 
+            '/people': 'people',
+            '/list': 'list'
+        }
+        return path_to_type.get(self.endpoint_path)

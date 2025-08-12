@@ -386,19 +386,47 @@ class SearchResource:
         query = response_data.get('query', params.q or '')
         categories = response_data.get('category', [])
         
+        # Parse records in each category into Pydantic models if available
+        parsed_categories = []
+        for category in categories:
+            parsed_category = category.copy()
+            if 'records' in parsed_category:
+                parsed_category['records'] = self._parse_category_records(parsed_category['records'])
+            parsed_categories.append(parsed_category)
+        
         # Calculate total results across all categories
         total_results = sum(
             cat.get('records', {}).get('total', 0) 
-            for cat in categories
+            for cat in parsed_categories
         )
         
         return SearchResult(
             query=query,
-            categories=categories,
+            categories=parsed_categories,
             total_results=total_results,
             cursors={},  # Will be populated in __post_init__
             response_data=response_data
         )
+    
+    def _parse_category_records(self, records_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Parse records within a category into Pydantic models if available."""
+        try:
+            from ..models import parse_records
+            
+            # Try to parse with models
+            parsed_records = parse_records(records_data)
+            if parsed_records:
+                # Merge parsed records back into records_data
+                updated_records = records_data.copy()
+                updated_records.update(parsed_records)
+                return updated_records
+        except ImportError:
+            # Models not available, return raw data
+            pass
+        except Exception as e:
+            logger.debug(f"Failed to parse search records into models: {e}")
+        
+        return records_data
         
     def _extract_records_from_category(self, category_data: Dict[str, Any], 
                                      category_code: str) -> List[Dict[str, Any]]:
