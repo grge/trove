@@ -8,11 +8,16 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that p
 
 ## Overview
 
-The Trove MCP Server exposes Australia's national digital collection through three powerful tools designed for AI agents:
+The Trove MCP Server exposes Australia's national digital collection through eight powerful tools designed for AI agents:
 
 - 🔍 **search_page** - Advanced search across 10+ content categories
-- 📰 **get_article** - Retrieve newspaper and gazette articles with full text
 - 📚 **get_work** - Access books, images, maps, music, and other works
+- 📰 **get_article** - Retrieve newspaper and gazette articles with full text
+- 👥 **get_people** - Access biographical records and authority files
+- 📝 **get_list** - Retrieve user-created lists and collections
+- 🔗 **resolve_pid** - Resolve PIDs and URLs to record information
+- 📚 **cite_bibtex** - Generate BibTeX format citations
+- 📄 **cite_csl_json** - Generate CSL-JSON format citations
 
 Built on [FastMCP](https://github.com/jlowin/fastmcp) for reliable async operation and structured output.
 
@@ -107,20 +112,6 @@ Search across Trove's digital collection with advanced filtering.
 - `list` 📝 - User-created lists
 - `research` 🔬 - Research publications and reports
 
-### 📰 get_article
-Retrieve detailed newspaper and gazette articles with full text content.
-
-**Example Usage:**
-```json
-{
-  "tool": "get_article",
-  "arguments": {
-    "record_id": "18341291",
-    "include_fields": ["text", "corrections"]
-  }
-}
-```
-
 ### 📚 get_work
 Access detailed information about books, images, maps, music, and other works.
 
@@ -132,6 +123,92 @@ Access detailed information about books, images, maps, music, and other works.
     "record_id": "12345",
     "include_fields": ["holdings", "tags"],
     "record_level": "full"
+  }
+}
+```
+
+### 📰 get_article
+Retrieve detailed newspaper and gazette articles with full text content.
+
+**Example Usage:**
+```json
+{
+  "tool": "get_article",
+  "arguments": {
+    "article_id": "18341291",
+    "article_type": "newspaper",
+    "include_fields": ["text", "corrections"]
+  }
+}
+```
+
+### 👥 get_people
+Access biographical records and authority files for people and organizations.
+
+**Example Usage:**
+```json
+{
+  "tool": "get_people",
+  "arguments": {
+    "record_id": "12345",
+    "include_fields": ["occupations", "alternativeNames"],
+    "record_level": "full"
+  }
+}
+```
+
+### 📝 get_list
+Retrieve user-created lists and collections with their contents.
+
+**Example Usage:**
+```json
+{
+  "tool": "get_list",
+  "arguments": {
+    "record_id": "21922",
+    "include_fields": ["items"],
+    "record_level": "brief"
+  }
+}
+```
+
+### 🔗 resolve_pid
+Resolve Trove persistent identifiers (PIDs) and URLs to basic record information.
+
+**Example Usage:**
+```json
+{
+  "tool": "resolve_pid",
+  "arguments": {
+    "identifier": "nla.news-article18341291"
+  }
+}
+```
+
+### 📚 cite_bibtex
+Generate BibTeX format citations from Trove records or PIDs.
+
+**Example Usage:**
+```json
+{
+  "tool": "cite_bibtex",
+  "arguments": {
+    "source": "https://nla.gov.au/nla.obj-123456789",
+    "record_type": "work"
+  }
+}
+```
+
+### 📄 cite_csl_json
+Generate CSL-JSON format citations for use with reference management tools.
+
+**Example Usage:**
+```json
+{
+  "tool": "cite_csl_json",
+  "arguments": {
+    "source": "nla.obj-123456789",
+    "record_type": "article"
   }
 }
 ```

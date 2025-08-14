@@ -20,13 +20,17 @@ A full-featured Python SDK for direct integration with Trove API v3:
 - **🛡️ Production Ready** - Comprehensive error handling, type hints, extensive testing
 
 ### 🤖 [Trove MCP Server](packages/trove-mcp/)
-A Model Context Protocol server that enables AI agents to access Trove:
+A Model Context Protocol server that enables AI agents to access Trove through 8 specialized tools:
 - **🔍 search_page** - Advanced search across 10+ content categories  
+- **📚 get_work** - Access books, images, maps, music, and other works
 - **📰 get_article** - Retrieve newspaper articles with full text
-- **📚 get_work** - Access detailed work records and metadata
+- **👥 get_people** - Access biographical records and authority files
+- **📝 get_list** - Retrieve user-created lists and collections
+- **🔗 resolve_pid** - Resolve PIDs and URLs to record information
+- **📚 cite_bibtex** - Generate BibTeX format citations
+- **📄 cite_csl_json** - Generate CSL-JSON format citations
 - **📊 Structured Output** - Rich Pydantic models for reliable AI integration
 - **🔒 Security First** - Environment-only API keys, input validation
-- **📚 Built-in Resources** - Interactive documentation and guidance
 
 ## Quick Start
 
@@ -161,10 +165,15 @@ uv run trove-mcp
 }
 ```
 
-**MCP Tools:**
+**MCP Tools (8 total):**
 - `search_page` - Search with categories, query, filters, pagination
-- `get_article` - Retrieve newspaper articles with full text and metadata
 - `get_work` - Access books, images, maps, music with detailed information
+- `get_article` - Retrieve newspaper articles with full text and metadata
+- `get_people` - Access biographical records and authority files
+- `get_list` - Retrieve user-created lists and collections
+- `resolve_pid` - Resolve PIDs and URLs to record information
+- `cite_bibtex` - Generate BibTeX format citations
+- `cite_csl_json` - Generate CSL-JSON format citations
 
 ## Project Structure
 
