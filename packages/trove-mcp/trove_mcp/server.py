@@ -288,11 +288,15 @@ async def search_page(
         if bulk_harvest:
             search_builder = search_builder.harvest()
         
-        # Execute search
+        # Handle pagination cursor
         if cursor:
-            # Handle pagination with cursor (would need cursor support in SDK)
-            results = await search_builder.afirst_page()
+            # The cursor parameter maps to the 's' parameter in SearchParameters
+            # We need to create a custom SearchParameters object with the cursor
+            params = search_builder._spec.to_parameters()
+            params.s = cursor
+            results = await client.resources.get_search_resource().apage(params=params)
         else:
+            # Execute search normally
             results = await search_builder.afirst_page()
         
         # Extract cursors for pagination

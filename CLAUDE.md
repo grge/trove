@@ -72,6 +72,28 @@ TROVE_CACHE_BACKEND=memory
 TROVE_LOG_REQUESTS=false
 ```
 
+### MCP Server Management
+
+When working with the MCP server during development:
+
+**To restart the MCP server:**
+```bash
+# Kill running server processes
+ps aux | grep -i trove
+kill [process_ids]
+
+# Or use pkill to kill by name
+pkill -f trove-mcp
+
+# Relaunch the MCP server
+claude mcp list
+```
+
+**Quick restart command:**
+```bash
+pkill -f trove-mcp && claude mcp list
+```
+
 ## External Links
 
 - [Official Trove API Documentation](https://trove.nla.gov.au/about/create-something/using-api)
