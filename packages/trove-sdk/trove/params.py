@@ -78,7 +78,7 @@ class SearchParameters:
     q: Optional[str] = None
     
     # Pagination and results
-    s: str = "*"  # start cursor
+    s: Union[int, str] = 0  # start position (0 for first page, or cursor string for continuation)
     n: int = 20   # number of results
     sortby: SortBy = SortBy.RELEVANCE
     bulkHarvest: bool = False
