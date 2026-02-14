@@ -1,43 +1,34 @@
-# Research and usage scripts - these go in ~/code/fam/
-*search*.py
-*bridge*.py
-*research*.py
-*curator*.py
-research_assistant.py
-run*.sh
-analyze*.sh
-extract*.py
-debug*.py
-check*.py
-fetch*.py
-comprehensive*.py
-simple*.py
-systematic*.py
-verify*.py
-ambrose*.py
-
-# Research data
-research-data/
-research-archive/
-*.json
-
-# Temporary research docs
-QUICK_START.md
-RESEARCH_SYSTEM_IMPROVEMENTS.md
-SDK_BUG_REPORT.md
-SEARCH_VISIBILITY_ANALYSIS.md
-SIMPLE_BETTER_APPROACH.md
-research_synthesis_subagent.md
-
-# Build and venv
+# Virtual environments
 .venv/
-build/
-dist/
-*.egg-info/
+venv/
+ENV/
+
+# Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
 .pytest_cache/
+.coverage
+htmlcov/
 
 # IDE
 .vscode/
@@ -45,10 +36,11 @@ __pycache__/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
-Thumbs.db
 
-# uv cache
-.uv/
+# Build
+uv.lock
+
+# Environment
+.env
+.env.local
