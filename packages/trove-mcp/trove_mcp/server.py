@@ -10,8 +10,10 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, Any, List, Optional, Literal, Union
 
+from dotenv import load_dotenv
 from pydantic import Field
 from mcp.server.fastmcp import FastMCP, Context
 from mcp.server.session import ServerSession
@@ -1132,7 +1134,18 @@ def main():
     """Main entry point for the MCP server."""
     import argparse
     import asyncio
-    
+
+    # Load TROVE_API_KEY (and friends) from a .env file. The MCP host launches
+    # this process without the key in its environment, so we must read it
+    # ourselves. Search upward from this package so it works regardless of cwd;
+    # the key currently lives at <repo-root>/.env (two levels above the package).
+    # Existing environment variables take precedence (override=False).
+    for parent in Path(__file__).resolve().parents:
+        env_path = parent / ".env"
+        if env_path.is_file():
+            load_dotenv(env_path, override=False)
+            break
+
     parser = argparse.ArgumentParser(description="Trove MCP Server")
     parser.add_argument(
         "--transport", 
