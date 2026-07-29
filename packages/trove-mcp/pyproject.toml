@@ -39,6 +39,11 @@ dev = [
 [project.scripts]
 trove-mcp = "trove_mcp.server:main"
 
+[tool.uv.sources]
+# Develop against the SDK source in-place so edits take effect without rebuilding
+# a wheel copy into the venv (which previously masked the s='*' pagination fix).
+trove-sdk = { path = "../trove-sdk", editable = true }
+
 [tool.hatch.build.targets.wheel]
 packages = ["trove_mcp"]
 

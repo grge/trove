@@ -78,7 +78,7 @@ class SearchParameters:
     q: Optional[str] = None
     
     # Pagination and results
-    s: Union[int, str] = 0  # start position (0 for first page, or cursor string for continuation)
+    s: Union[int, str] = '*'  # start cursor ('*' for first page, or cursor string for continuation). Trove v3 rejects s=0 with HTTP 500.
     n: int = 20   # number of results
     sortby: SortBy = SortBy.RELEVANCE
     bulkHarvest: bool = False
@@ -147,8 +147,9 @@ class SearchParameters:
         if self.q is not None:
             params['q'] = self.q
             
-        # Pagination
-        params['s'] = self.s
+        # Pagination. Trove v3 uses opaque cursor pagination: the first page must be
+        # s='*', not s=0 (which returns HTTP 500). Coerce the legacy 0 default for safety.
+        params['s'] = '*' if self.s in (0, '0') else self.s
         params['n'] = self.n
         params['sortby'] = self.sortby.value
         if self.bulkHarvest:
